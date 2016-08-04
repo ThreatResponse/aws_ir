@@ -1,0 +1,12 @@
+moto
+mock
+ping
+magicmock
+pytest==2.9.1
+pytest-cov
+boto3==1.3.0
+progressbar-latest
+requests
+structlog
+pytz
+logutils
