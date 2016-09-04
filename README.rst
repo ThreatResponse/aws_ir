@@ -1,7 +1,7 @@
 AWS IR
 ======
 
-Python installable command line utiltity for mitigation of host and key compromises.
+Python installable command line utility for mitigation of host and key compromises.
 
 Documentation
 -------------
