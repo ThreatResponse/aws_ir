@@ -63,3 +63,5 @@ target/
 
 *.swp
 awsir/*.ko
+
+docs/_build

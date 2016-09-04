@@ -1,0 +1,16 @@
+
+================
+AWS IR
+================
+
+Python installable command line utiltity for mitigation of host and key compromises.
+
+.. toctree::
+   :maxdepth: 2
+
+   quickstart
+   installing
+   user_guide
+   development
+   about
+
