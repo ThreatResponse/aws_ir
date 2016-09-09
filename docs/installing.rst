@@ -9,7 +9,7 @@ Currently only linux is a supported platform.  Python 3 compatability is maintai
 
 While aws_ir is written purely in python, some of the libraries used require additional system packages.
 
-Fedora / REHL Distributions
+Fedora / RHEL Distributions
 ---------------------------
 
 * python-devel (Python 2.7+)
