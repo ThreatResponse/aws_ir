@@ -22,6 +22,6 @@ setup(name="aws_ir",
                         'requests',
                         'structlog',
                         'pytz',
-                        'margarita_shotgun'],
+                        'margaritashotgun>=0.3.1'],
       tests_require=['pytest'],
       )

@@ -10,3 +10,4 @@ requests
 structlog
 pytz
 logutils
+margaritashotgun>=0.3.1
