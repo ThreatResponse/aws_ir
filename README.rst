@@ -16,7 +16,7 @@ For more information see the `user guide <https://aws_ir.readthedocs.io/en/lates
 Installation
 ************
 
-``pip install git+ssh://git@github.com/ThreatResponse/aws_ir.git@master``
+``pip install aws_ir``
 
 Or see `installing <https://aws_ir.readthedocs.io/en/latest/installing.html>`__.
 

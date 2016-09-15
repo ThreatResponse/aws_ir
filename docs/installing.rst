@@ -28,7 +28,9 @@ Debian Distributions
 Installing from PyPi
 ********************
 
-AWS_IR is not currently listed in PyPi, while we work on that install via one of the methods below.
+.. code-block:: bash
+
+   $ pip install aws_ir
 
 
 Installing From Github
