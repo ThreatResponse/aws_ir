@@ -90,7 +90,7 @@ class CaseBucket(object):
         return response
 
     def __check_tags(self, tag_object):
-        if tag is None:
+        if tag_object is None:
             return False
         for tag in tag_object['TagSet']:
             if tag['Value'] == self.case_number:
