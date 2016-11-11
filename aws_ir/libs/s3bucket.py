@@ -33,12 +33,18 @@ class CaseBucket(object):
         return bucket_name
 
     def __create_s3_bucket(self):
-        bucket = self.s3.create_bucket(
-            Bucket=self.bucket_name,
-            CreateBucketConfiguration={
-                'LocationConstraint': self.region
-            }
-        )
+        # the if statement is to prevent a fun little bug https://github.com/boto/boto3/issues/125
+        if self.region == 'us-east-1':
+          bucket = self.s3.create_bucket(
+            Bucket=self.bucket_name
+          )
+        else:
+            bucket = self.s3.create_bucket(
+                Bucket=self.bucket_name,
+                CreateBucketConfiguration={
+                    'LocationConstraint': self.region
+                }
+            )
         return bucket
 
     def __set_acls(self, bucket_name):
@@ -90,6 +96,8 @@ class CaseBucket(object):
         return response
 
     def __check_tags(self, tag_object):
+        if tag_object is None:
+            return False
         for tag in tag_object['TagSet']:
             if tag['Value'] == self.case_number:
                return True
