@@ -1,7 +1,4 @@
-moto
-mock
 ping
-magicmock
 pytest
 pytest-cov
 boto3>=1.3.0
