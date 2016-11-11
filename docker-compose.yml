@@ -3,4 +3,5 @@ services:
   aws_ir:
     build: .
     volumes:
-      - ~/.aws:~/.aws
+      - ~/.aws:/root/.aws
+      - .:/aws_ir/

@@ -66,6 +66,17 @@ class cli():
             """
         )
 
+        parser.add_argument(
+            '-d',
+            '--dry-run',
+            default=None,
+            help="""
+                Dry run. Pass dry run
+                parameter to perform API calls
+                but will not modify any resources.
+            """
+        )
+
         subparsers = parser.add_subparsers()
 
         host_compromise_parser = subparsers.add_parser(

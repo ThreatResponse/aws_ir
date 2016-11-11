@@ -8,5 +8,4 @@ RUN pip install --upgrade pip
 
 ADD . /aws_ir/
 
-
-
+WORKDIR /aws_ir
