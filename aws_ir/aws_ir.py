@@ -10,28 +10,22 @@ import subprocess
 import sys
 import tempfile
 import time
-import uuid
 import json
-import base64
-import margaritashotgun
-
-import settings
-
 
 from libs import ts_logger
-
 from libs import connection
 from libs import aws
 from libs import s3bucket
 from libs import inventory
 from libs import cloudtrail
 from libs import compromised
+from libs import volatile
 
 from plugins import isolate_host
 from plugins import tag_host
 from plugins import gather_host
 from plugins import snapshotdisks_host
-
+from plugins import stop_host
 
 class DisableOwnKeyError(RuntimeError):
     """ Thrown when a request is made to disable the current key being used.  """
@@ -208,20 +202,6 @@ class AWS_IR(object):
         ip_addr = r.text.strip()
         self.examiner_cidr_range = ip_addr + "/32"
 
-    def stop_instance(self, instance_id, region, force=False ):
-        client = connection.Connection(
-                    type='client',
-                    service='ec2',
-                    region=region
-        ).connect()
-
-        response = client.stop_instances(
-            InstanceIds=[instance_id],
-            Force=force
-        )
-        self.event_to_logs('Stopping instance: instance_id={0}'.format(instance_id))
-        return response
-
 
 
 
@@ -253,26 +233,6 @@ class HostCompromise(AWS_IR):
         self.compromised_host_ip = compromised_host_ip
         super(HostCompromise, self).__init__(examiner_cidr_range, case_number=case_number, bucket=bucket)
 
-    def get_memory(self, bucket, ip, user, key, case_num, port=None, password=None):
-        name = 'margaritashotgun'
-        config = dict(aws = dict(bucket = bucket),
-                      hosts = [ dict(addr = ip, port = port,
-                                    username = user,
-                                    password = password,
-                                    key = key) ],
-                      workers = 'auto',
-                      logging = dict(log_dir = '/tmp/',
-                                     prefix = ("{case_num}-{ip}").format(
-                                                  ip=ip,
-                                                  case_num=case_num )),
-                      repository = dict(enabled = True,
-                                        url = ('https://threatresponse-lime'
-                                               '-modules.s3.amazonaws.com/')))
-        capture_client = margaritashotgun.client(name=name, config=config,
-                                                 library=True, verbose=True)
-        # returns {'total': ..., 'failed': [ip, ip, ...], 'completed': [ip, ip, ...]}
-        return capture_client.run()
-
     def mitigate(self):
         self.setup()
 
@@ -295,6 +255,7 @@ class HostCompromise(AWS_IR):
 
 
         self.setup_bucket(compromised_resource['region'])
+
         """
         # step 1 - isolate
         isolate_host.Isolate(
@@ -316,7 +277,7 @@ class HostCompromise(AWS_IR):
             compromised_resource = compromised_resource,
             dry_run=False
         )
-        """
+
 
         # step 4 - create snapshot
         snapshotdisks_host.Snapshotdisks(
@@ -325,43 +286,57 @@ class HostCompromise(AWS_IR):
             dry_run=False
         )
 
-
-
         # step 5 - gather memory
-        #if self.inventory_compromised_host['platform'] == 'windows':
-        #    self.event_to_logs('Platform is Windows skipping live memory')
-        #else:
-        #    self.event_to_logs(
-        #        "Attempting run margarita shotgun for {user} on {ip} with {keyfile}".format(
-        #            user=self.user,
-        #            ip=self.compromised_host_ip,
-        #            keyfile=self.ssh_key_file_path
-        #            )
-        #        )
-        #    try:
+        if compromised_resource['platform'] == 'windows':
+            self.event_to_logs('Platform is Windows skipping live memory')
+        else:
+            self.event_to_logs(
+                "Attempting run margarita shotgun for {user} on {ip} with {keyfile}".format(
+                    user=self.user,
+                    ip=self.compromised_host_ip,
+                    keyfile=self.ssh_key_file_path
+                    )
+                )
+            try:
+                volatile_data = volatile.Memory(
+                    client=client,
+                    compromised_resource = compromised_resource,
+                    dry_run=False
+                )
 
-        #        results = self.get_memory(self.bucket, self.compromised_host_ip,
-        #                                  self.user, self.ssh_key_file_path,
-        #                                  self.case_number)
-        #        self.event_to_logs(("memory capture completed for: {0}, "
-        #                            "failed for: {1}".format(results['completed'],
-        #                                                     results['failed'])))
-        #    except Exception as ex:
-        #        # raise keyboard interrupt passed during memory capture
-        #        if isinstance(ex, KeyboardInterrupt):
-        #            raise
-        #        else:
-        #            self.event_to_logs(
-        #                ( "Memory acquisition failure with exception"
-        #                  "{exception}. ".format(exception=ex) )
-        #            )
+                results = volatile_data.get_memory(
+                      bucket=self.bucket,
+                      ip=self.compromised_host_ip,
+                      user=self.user,
+                      key=self.ssh_key_file_path,
+                      case_number=self.case_number
+                 )
 
+                self.event_to_logs(("memory capture completed for: {0}, "
+                                    "failed for: {1}".format(results['completed'],
+                                                             results['failed'])))
+            except Exception as ex:
+                # raise keyboard interrupt passed during memory capture
+                if isinstance(ex, KeyboardInterrupt):
+                    raise
+                else:
+                    self.event_to_logs(
+                        (
+                            "Memory acquisition failure with exception"
+                              "{exception}. ".format(
+                                                exception=ex
+                            )
+                        )
+                    )
 
+        """
         # step 6 - shutdown instance
-        #self.stop_instance(
-        #    self.inventory_compromised_host['instance_id'],
-        #    self.inventory_compromised_host['region']
-        #)
+        stop_host.Stop(
+            client=client,
+            compromised_resource = compromised_resource,
+            dry_run=False
+        )
+
         #self.teardown(
         #    region=self.inventory_compromised_host['region'],
         #    resource_id=self.inventory_compromised_host['instance_id']
