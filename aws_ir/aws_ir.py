@@ -26,10 +26,8 @@ from plugins import tag_host
 from plugins import gather_host
 from plugins import snapshotdisks_host
 from plugins import stop_host
+from plugins import disableaccess_key
 
-class DisableOwnKeyError(RuntimeError):
-    """ Thrown when a request is made to disable the current key being used.  """
-    pass
 class MissingDependencyError(RuntimeError):
     """ Thrown when this program is missing a dependency. """
     pass
@@ -72,8 +70,40 @@ class AWS_IR(object):
 
     def event_to_logs(self, message):
         json_event = ts_logger.timesketch_logger(message, self.case_number)
-        json_event
         self.logger.info(message)
+
+    def setup_bucket(self, region):
+        if self.bucket == None:
+            self.bucket = s3bucket.CaseBucket(self.case_number, region).bucket.name
+            self.event_to_logs("Setup bucket {bucket} found.".format(
+                    bucket=self.bucket
+                )
+            )
+
+    def rename_log_file(self, case_number, resource_id):
+        os.rename(
+            ("/tmp/{case_number}-aws_ir.log").format(
+                case_number=case_number,
+                ),
+            ("/tmp/{case_number}-{resource_id}-aws_ir.log").format(
+                case_number=case_number,
+                resource_id=resource_id
+                )
+        )
+
+    def get_case_logs(self):
+        files = []
+        for file in os.listdir("/tmp"):
+            if file.startswith(self.case_number):
+                files.append(file)
+        return files
+
+    def copy_logs_to_s3(self):
+        s3 = boto3.resource('s3')
+        case_bucket = s3.Bucket(self.bucket)
+        logs = self.get_case_logs()
+        for log in logs:
+            case_bucket.upload_file(str("/tmp/" + log), log)
 
     def mitigate(self):
         raise NotImplementedError('Use HostCompromise or KeyCompromise')
@@ -109,7 +139,7 @@ class AWS_IR(object):
         )
 
         self.event_to_logs(
-                "Beginning inventory of instances world wide.  This might take a minute..."
+                "Beginning inventory of resources world wide.  This might take a minute..."
         )
 
         self.aws_inventory = inventory.Inventory(
@@ -134,76 +164,18 @@ class AWS_IR(object):
                 )
             ).trail_list
 
-    def setup_bucket(self, region):
-        if self.bucket == None:
-            self.bucket = s3bucket.CaseBucket(self.case_number, region).bucket.name
-
-    def rename_log_file(self, case_number, resource_id):
-        os.rename(
-            ("/tmp/{case_number}-aws_ir.log").format(
-                case_number=case_number,
-                ),
-            ("/tmp/{case_number}-{resource_id}-aws_ir.log").format(
-                case_number=case_number,
-                resource_id=resource_id
-                )
-        )
-
     def teardown(self, region, resource_id):
         """ Any final post mitigation steps """
         #Rename log file to include instance or key_id
-        self.rename_log_file(self.case_number, resource_id)
+        try:
+            self.rename_log_file(self.case_number, resource_id)
+        except:
+            pass
         self.copy_logs_to_s3()
         processing_end_messaging = (
-            """Processing complete"""
+            """Processing complete for {case_number}"""
         ).format(case_number=self.case_number, caller="aws_ir", region=region)
         print(processing_end_messaging)
-
-    def get_case_logs(self):
-        files = []
-        for file in os.listdir("/tmp"):
-            if file.startswith(self.case_number):
-                files.append(file)
-        return files
-
-    def copy_logs_to_s3(self):
-        s3 = boto3.resource('s3')
-        case_bucket = s3.Bucket(self.bucket)
-        logs = self.get_case_logs()
-        for log in logs:
-            case_bucket.upload_file(str("/tmp/" + log), log)
-
-    def get_aws_session(self, region='us-west-2'):
-        session = boto3.Session(
-             region_name=region
-        )
-        return session
-
-    def disable_access_key(self, access_key_id, force_disable_self=False):
-        session = boto3.session.Session()
-        own_access_key_ids = [ x['aws_access_key_id'] for x in session._session.__dict__['_config']['profiles'].itervalues() ]
-        if access_key_id  in own_access_key_ids  and force_disable_self is not True:
-            raise DisableOwnKeyError()
-
-        client = self.session.client('iam')
-
-        # we get the username for the key because even though username is optional
-        # if the username is not provided, the key will not be found, contrary to what
-        # the documentation says.
-        response = client.get_access_key_last_used(AccessKeyId=access_key_id)
-        username = response['UserName']
-
-        client.update_access_key(UserName=username, AccessKeyId=access_key_id, Status='Inactive')
-        self.event_to_logs('Set satus of access key {0} to Inactive'.format(access_key_id))
-
-
-    def populate_examiner_cidr_range(self):
-        r = requests.get('http://ipecho.net/plain')
-        ip_addr = r.text.strip()
-        self.examiner_cidr_range = ip_addr + "/32"
-
-
-
 
 class HostCompromise(AWS_IR):
     """ Procedures for responding to a HostCompromise.
@@ -256,7 +228,7 @@ class HostCompromise(AWS_IR):
 
         self.setup_bucket(compromised_resource['region'])
 
-        """
+
         # step 1 - isolate
         isolate_host.Isolate(
             client=client,
@@ -329,7 +301,7 @@ class HostCompromise(AWS_IR):
                         )
                     )
 
-        """
+
         # step 6 - shutdown instance
         stop_host.Stop(
             client=client,
@@ -365,8 +337,36 @@ class KeyCompromise(AWS_IR):
         self.setup()
         self.setup_bucket(region=self.region)
 
+        access_key = self.compromised_access_key_id
+        compromised_resource = compromised.CompromisedMetadata(
+            compromised_object_inventory = {
+                'access_key_id': access_key,
+                'region': self.region
+            },
+            case_number=self.case_number,
+            type_of_compromise='key_compromise'
+        ).data()
+
+        client = connection.Connection(
+            type='client',
+            service='ec2',
+            region=compromised_resource['region']
+        ).connect()
+
+        self.event_to_logs(
+                "Attempting key disable."
+        )
         # step 1 - disable access key
-        self.disable_access_key(self.compromised_access_key_id)
+        disableaccess_key.Disableaccess(
+            client=client,
+            compromised_resource = compromised_resource,
+            dry_run=False
+        )
+
+        self.event_to_logs(
+                "Disable complete.  Uploading results."
+        )
+
         self.teardown(
             region=self.region,
             resource_id=self.compromised_access_key_id
