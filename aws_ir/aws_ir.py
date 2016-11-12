@@ -179,9 +179,7 @@ class AWS_IR(object):
 
 class HostCompromise(AWS_IR):
     """ Procedures for responding to a HostCompromise.
-
         ** For now, assume only Linux system.
-
     """
     case_type = 'Host'
     def __init__(self,
@@ -309,10 +307,10 @@ class HostCompromise(AWS_IR):
             dry_run=False
         )
 
-        #self.teardown(
-        #    region=self.inventory_compromised_host['region'],
-        #    resource_id=self.inventory_compromised_host['instance_id']
-        #)
+        self.teardown(
+            region=self.compromised_resource['region'],
+            resource_id=self.compromised_resource['instance_id']
+        )
 
 class KeyCompromise(AWS_IR):
     case_type = 'Key'
