@@ -7,16 +7,6 @@ import time
 import urllib.request
 from datetime import datetime, timedelta
 
-class InventoryType(object):
-    def __init__(self):
-        self.type = self.__inventory_type()
-
-    def __inventory_type(self):
-        if os.environ.get('EDDA_SERVER'):
-            return "edda"
-        else:
-            return "aws"
-
 class Query(object):
   def __init__(self, client, regions, inventory_type):
     self.client = client
@@ -67,12 +57,12 @@ class Query(object):
         port=port,
         base_url=base_url
       )
-      print(edda_url)
       return edda_url
 
   def __extract_data_aws(self, instance, region):
     return dict(
         public_ip_address = instance.get('PublicIpAddress', None),
+        private_ip_address = instance.get('PrivateIpAddress', None),
         instance_id = instance['InstanceId'],
         launch_time = instance['LaunchTime'],
         platform = instance.get('Platform', None),
@@ -85,6 +75,7 @@ class Query(object):
   def __extract_data_edda(self, instance):
     return dict(
         public_ip_address = instance.get('publicIpAddress', None),
+        private_ip_address = instance.get('privateIpAddress', None),
         instance_id = instance['instanceId'],
         launch_time =  instance['launchTime'],
         platform = instance.get('platform', None),
@@ -105,6 +96,16 @@ class Query(object):
     for region in self.regions:
         inventory[region] = self.get_running_by_region_edda(region)
     return inventory
+
+class InventoryType(object):
+    def __init__(self):
+        self.type = self.__inventory_type()
+
+    def __inventory_type(self):
+        if os.environ.get('EDDA_SERVER'):
+            return "edda"
+        else:
+            return "aws"
 
 class Inventory(object):
   def __init__(self, client, regions):
