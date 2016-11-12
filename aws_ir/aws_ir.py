@@ -29,6 +29,9 @@ from libs import compromised
 
 from plugins import isolate_host
 from plugins import tag_host
+from plugins import gather_host
+from plugins import snapshotdisks_host
+
 
 class DisableOwnKeyError(RuntimeError):
     """ Thrown when a request is made to disable the current key being used.  """
@@ -182,62 +185,6 @@ class AWS_IR(object):
         )
         return session
 
-
-    def get_aws_instance_metadata(self, instance_id, region):
-        client = connection.Connection(
-            type='client',
-            service='ec2',
-            region=region
-        ).connect()
-        metadata = client.describe_instances(
-                         Filters=[{'Name': 'instance-id', 'Values': [instance_id]}]
-                         )['Reservations']
-        return metadata
-
-    def log_aws_instance_metadata(self, instance_id, data):
-        logfile = ("/tmp/{case_number}-{instance_id}-metadata.log").format(
-            case_number=self.case_number, instance_id=instance_id
-        )
-        with open(logfile,'w') as w:
-            w.write(str(data))
-
-    def get_aws_instance_console_output(self, instance_id, region):
-        client = connection.Connection(
-                    type='client',
-                    service='ec2',
-                    region=region
-                ).connect()
-        output = client.get_console_output(InstanceId=instance_id)
-        return output
-
-    def log_aws_instance_console_output(self, instance_id, data):
-        logfile = ("/tmp/{case_number}-{instance_id}-console.log").format(
-            case_number=self.case_number, instance_id=instance_id
-        )
-        with open(logfile,'w') as w:
-            w.write(str(data))
-
-    def log_aws_instance_screenshot(self, instance_id, region):
-
-        client = connection.Connection(
-            type='client',
-            service='ec2',
-            region=region
-        ).connect()
-
-        response = client.get_console_screenshot(
-               InstanceId=instance_id,
-               WakeUp=True
-        )
-        logfile = ("/tmp/{case_number}-{instance_id}-screenshot.jpg").format(
-            case_number=self.case_number, instance_id=instance_id
-        )
-        fh = open(logfile, "wb")
-        fh.write(base64.b64decode(response['ImageData']))
-        fh.close()
-
-
-
     def disable_access_key(self, access_key_id, force_disable_self=False):
         session = boto3.session.Session()
         own_access_key_ids = [ x['aws_access_key_id'] for x in session._session.__dict__['_config']['profiles'].itervalues() ]
@@ -255,35 +202,6 @@ class AWS_IR(object):
         client.update_access_key(UserName=username, AccessKeyId=access_key_id, Status='Inactive')
         self.event_to_logs('Set satus of access key {0} to Inactive'.format(access_key_id))
 
-    def snapshot_volumes(self, volume_ids, region):
-        if not isinstance(volume_ids, list):
-            volume_ids = [ volume_ids ]
-
-        client = connection.Connection(
-                type='client',
-                service='ec2',
-                region=region
-        ).connect()
-
-        session = self.get_aws_session(region=region)
-        ec2 = session.resource('ec2')
-        responses = []
-        for volume_id in volume_ids:
-            description = 'Snapshot of {vid} for case {cn}'.format(vid=volume_id, cn=self.case_number)
-            snapshot_response = client.create_snapshot(VolumeId=volume_id, Description=description)
-            snapshot_id = snapshot_response['SnapshotId']
-            self.event_to_logs('Took a snapshot of volume {vid} to snapshot {sid}'.format(vid=volume_id, sid=snapshot_id))
-
-            #add tag to snapshot
-            snapshot = ec2.Snapshot(snapshot_id)
-            snapshot.create_tags(Tags=[dict(
-                Key='cr-case-number',
-                Value=self.case_number
-            )])
-
-            responses.append(snapshot_response)
-
-        return responses
 
     def populate_examiner_cidr_range(self):
         r = requests.get('http://ipecho.net/plain')
@@ -335,15 +253,6 @@ class HostCompromise(AWS_IR):
         self.compromised_host_ip = compromised_host_ip
         super(HostCompromise, self).__init__(examiner_cidr_range, case_number=case_number, bucket=bucket)
 
-
-
-    def create_snapshots(self):
-        volume_ids = self.inventory_compromised_host['volume_ids']
-        region = self.inventory_compromised_host['region']
-
-        responses = self.snapshot_volumes(volume_ids, region)
-        self.snapshot_ids = [ sr['SnapshotId'] for sr in responses ]
-
     def get_memory(self, bucket, ip, user, key, case_num, port=None, password=None):
         name = 'margaritashotgun'
         config = dict(aws = dict(bucket = bucket),
@@ -386,7 +295,7 @@ class HostCompromise(AWS_IR):
 
 
         self.setup_bucket(compromised_resource['region'])
-
+        """
         # step 1 - isolate
         isolate_host.Isolate(
             client=client,
@@ -401,34 +310,21 @@ class HostCompromise(AWS_IR):
             dry_run=False
         )
 
-        # step 3 - get instance metadata and store it
-        #self.instance_metadata = self.get_aws_instance_metadata(
-        #    self.inventory_compromised_host['instance_id'],
-        #    self.inventory_compromised_host['region']
-        #)
-
-        #self.log_aws_instance_metadata(
-        #    self.inventory_compromised_host['instance_id'],
-        #    self.instance_metadata
-        #)
-
-        #self.instance_console_output = self.get_aws_instance_console_output(
-        #    self.inventory_compromised_host['instance_id'],
-        #    self.inventory_compromised_host['region']
-        #)
-
-        #self.log_aws_instance_console_output(
-        #    self.inventory_compromised_host['instance_id'],
-        #    self.instance_console_output
-        #)
-
-        #self.log_aws_instance_screenshot(
-        #    self.inventory_compromised_host['instance_id'],
-        #    self.inventory_compromised_host['region']
-        #)
+        #step 3 - get instance metadata and store it
+        gather_host.Gather(
+            client=client,
+            compromised_resource = compromised_resource,
+            dry_run=False
+        )
+        """
 
         # step 4 - create snapshot
-        #self.create_snapshots()
+        snapshotdisks_host.Snapshotdisks(
+            client=client,
+            compromised_resource = compromised_resource,
+            dry_run=False
+        )
+
 
 
         # step 5 - gather memory

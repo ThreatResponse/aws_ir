@@ -1,10 +1,14 @@
 import os
+import sys
 import boto3
 import json
 import pprint
 import time
 
-import urllib.request
+if sys.version_info[0] == 3:
+    import urllib.request as request
+else:
+    import urllib2 as request
 from datetime import datetime, timedelta
 
 class Query(object):
@@ -38,7 +42,7 @@ class Query(object):
 
     edda_url = self.__edda_url()
     api_call = "{edda_url}view/instances/;_all".format(edda_url=edda_url)
-    reservations = urllib.request.urlopen(api_call)
+    reservations = request.urlopen(api_call)
     reservations = json.loads(reservations.read().decode())
     for instance in reservations:
         instance_data = self.__extract_data_edda(instance)
