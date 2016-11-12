@@ -92,15 +92,23 @@ class Isolate(object):
                 return e
 
     def __add_network_acl_entry(self, acl_id):
-        response = self.client.create_network_acl_entry(
-            DryRun=self.dry_run,
-            NetworkAclId=acl_id,
-            RuleNumber=1337,
-            Protocol='-1',
-            RuleAction='deny',
-            Egress=True,
-            CidrBlock="{compromised_host_private_ip}/32".format(
-                compromised_host_private_ip=self.compromised_resource['private_ip_address']
+        try:
+            response = self.client.create_network_acl_entry(
+                DryRun=self.dry_run,
+                NetworkAclId=acl_id,
+                RuleNumber=1337,
+                Protocol='-1',
+                RuleAction='deny',
+                Egress=True,
+                CidrBlock="{compromised_host_private_ip}/32".format(
+                    compromised_host_private_ip=self.compromised_resource['private_ip_address']
+                )
             )
-        )
-        return True
+            return True
+        except Exception as e:
+            if e.response['Error']['Message'] == """
+            Request would have succeeded, but DryRun flag is set.
+            """:
+                return None
+            else:
+                return e

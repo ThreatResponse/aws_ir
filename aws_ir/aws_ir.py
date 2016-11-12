@@ -28,6 +28,7 @@ from libs import cloudtrail
 from libs import compromised
 
 from plugins import isolate_host
+from plugins import tag_host
 
 class DisableOwnKeyError(RuntimeError):
     """ Thrown when a request is made to disable the current key being used.  """
@@ -235,18 +236,7 @@ class AWS_IR(object):
         fh.write(base64.b64decode(response['ImageData']))
         fh.close()
 
-    def add_incident_tag_to_instance(self, instance_dict):
-        region = instance_dict['region']
-        instance_id = instance_dict['instance_id']
-        client = connection.Connection(
-                type='client',
-                service='ec2',
-                region=region
-        ).connect()
-        session = self.get_aws_session(region=region)
-        ec2 = session.resource('ec2')
-        tag = [{'Key': 'cr-case-number','Value': self.case_number}]
-        client.create_tags(Resources=[instance_id], Tags=tag)
+
 
     def disable_access_key(self, access_key_id, force_disable_self=False):
         session = boto3.session.Session()
@@ -405,7 +395,11 @@ class HostCompromise(AWS_IR):
         )
 
         # step 2 - apply compromised tag
-        #self.add_incident_tag_to_instance(self.inventory_compromised_host)
+        tag_host.Tag(
+            client=client,
+            compromised_resource = compromised_resource,
+            dry_run=False
+        )
 
         # step 3 - get instance metadata and store it
         #self.instance_metadata = self.get_aws_instance_metadata(
