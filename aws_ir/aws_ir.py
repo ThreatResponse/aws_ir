@@ -124,9 +124,7 @@ class AWS_IR(object):
         )
 
         self.inventory = self.aws_inventory.inventory
-        self.recent_instances = self.aws_inventory.recent()
 
-        self.log_aws_recent_instances(self.recent_instances)
         self.trail_logs = cloudtrail.CloudTrail(
             regions = self.amazon.regions,
             client = connection.Connection(
@@ -369,13 +367,6 @@ class AWS_IR(object):
         self.event_to_logs('Shifted instance into isolate security group.')
         pass
 
-    def log_aws_recent_instances(self, recent):
-         logfile = ("/tmp/{case_number}-recent_instances.log").format(
-             case_number=self.case_number
-         )
-         with open(logfile,'w') as w:
-             w.write(str(recent))
-
 
 class HostCompromise(AWS_IR):
     """ Procedures for responding to a HostCompromise.
@@ -463,85 +454,85 @@ class HostCompromise(AWS_IR):
         search = self.aws_inventory.locate_instance(self.compromised_host_ip)
         if search == None:
             raise ValueError('Compromised IP Address not found in inventory.')
-        self.inventory_compromised_host = search
+        #self.inventory_compromised_host = search
 
-        self.setup_bucket(self.inventory_compromised_host['region'])
+        #self.setup_bucket(self.inventory_compromised_host['region'])
 
         # step 1 - isolate
-        self.isolate()
+        #self.isolate()
 
         # step 2 - apply compromised tag
-        self.add_incident_tag_to_instance(self.inventory_compromised_host)
+        #self.add_incident_tag_to_instance(self.inventory_compromised_host)
 
         # step 3 - get instance metadata and store it
-        self.instance_metadata = self.get_aws_instance_metadata(
-            self.inventory_compromised_host['instance_id'],
-            self.inventory_compromised_host['region']
-        )
+        #self.instance_metadata = self.get_aws_instance_metadata(
+        #    self.inventory_compromised_host['instance_id'],
+        #    self.inventory_compromised_host['region']
+        #)
 
-        self.log_aws_instance_metadata(
-            self.inventory_compromised_host['instance_id'],
-            self.instance_metadata
-        )
+        #self.log_aws_instance_metadata(
+        #    self.inventory_compromised_host['instance_id'],
+        #    self.instance_metadata
+        #)
 
-        self.instance_console_output = self.get_aws_instance_console_output(
-            self.inventory_compromised_host['instance_id'],
-            self.inventory_compromised_host['region']
-        )
+        #self.instance_console_output = self.get_aws_instance_console_output(
+        #    self.inventory_compromised_host['instance_id'],
+        #    self.inventory_compromised_host['region']
+        #)
 
-        self.log_aws_instance_console_output(
-            self.inventory_compromised_host['instance_id'],
-            self.instance_console_output
-        )
+        #self.log_aws_instance_console_output(
+        #    self.inventory_compromised_host['instance_id'],
+        #    self.instance_console_output
+        #)
 
-        self.log_aws_instance_screenshot(
-            self.inventory_compromised_host['instance_id'],
-            self.inventory_compromised_host['region']
-        )
+        #self.log_aws_instance_screenshot(
+        #    self.inventory_compromised_host['instance_id'],
+        #    self.inventory_compromised_host['region']
+        #)
 
         # step 4 - create snapshot
-        self.create_snapshots()
+        #self.create_snapshots()
 
 
         # step 5 - gather memory
-        if self.inventory_compromised_host['platform'] == 'windows':
-            self.event_to_logs('Platform is Windows skipping live memory')
-        else:
-            self.event_to_logs(
-                "Attempting run margarita shotgun for {user} on {ip} with {keyfile}".format(
-                    user=self.user,
-                    ip=self.compromised_host_ip,
-                    keyfile=self.ssh_key_file_path
-                    )
-                )
-            try:
+        #if self.inventory_compromised_host['platform'] == 'windows':
+        #    self.event_to_logs('Platform is Windows skipping live memory')
+        #else:
+        #    self.event_to_logs(
+        #        "Attempting run margarita shotgun for {user} on {ip} with {keyfile}".format(
+        #            user=self.user,
+        #            ip=self.compromised_host_ip,
+        #            keyfile=self.ssh_key_file_path
+        #            )
+        #        )
+        #    try:
 
-                results = self.get_memory(self.bucket, self.compromised_host_ip,
-                                          self.user, self.ssh_key_file_path,
-                                          self.case_number)
-                self.event_to_logs(("memory capture completed for: {0}, "
-                                    "failed for: {1}".format(results['completed'],
-                                                             results['failed'])))
-            except Exception as ex:
-                # raise keyboard interrupt passed during memory capture
-                if isinstance(ex, KeyboardInterrupt):
-                    raise
-                else:
-                    self.event_to_logs(
-                        ( "Memory acquisition failure with exception"
-                          "{exception}. ".format(exception=ex) )
-                    )
+        #        results = self.get_memory(self.bucket, self.compromised_host_ip,
+        #                                  self.user, self.ssh_key_file_path,
+        #                                  self.case_number)
+        #        self.event_to_logs(("memory capture completed for: {0}, "
+        #                            "failed for: {1}".format(results['completed'],
+        #                                                     results['failed'])))
+        #    except Exception as ex:
+        #        # raise keyboard interrupt passed during memory capture
+        #        if isinstance(ex, KeyboardInterrupt):
+        #            raise
+        #        else:
+        #            self.event_to_logs(
+        #                ( "Memory acquisition failure with exception"
+        #                  "{exception}. ".format(exception=ex) )
+        #            )
 
 
         # step 6 - shutdown instance
-        self.stop_instance(
-            self.inventory_compromised_host['instance_id'],
-            self.inventory_compromised_host['region']
-        )
-        self.teardown(
-            region=self.inventory_compromised_host['region'],
-            resource_id=self.inventory_compromised_host['instance_id']
-        )
+        #self.stop_instance(
+        #    self.inventory_compromised_host['instance_id'],
+        #    self.inventory_compromised_host['region']
+        #)
+        #self.teardown(
+        #    region=self.inventory_compromised_host['region'],
+        #    resource_id=self.inventory_compromised_host['instance_id']
+        #)
 
 class KeyCompromise(AWS_IR):
     case_type = 'Key'

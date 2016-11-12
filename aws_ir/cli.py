@@ -13,6 +13,7 @@ class nullCli():
         self.config = None
         self.prog = None
 
+
 class cli():
 
     def __init__(self):
@@ -120,7 +121,6 @@ class cli():
         except AttributeError:
             parser.print_usage()
             print("no subcommand specified")
-            return nullCli()
 
         if parser.prog == 'cli.py':
             prog = './'+parser.prog
