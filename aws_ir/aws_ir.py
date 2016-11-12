@@ -25,6 +25,9 @@ from libs import aws
 from libs import s3bucket
 from libs import inventory
 from libs import cloudtrail
+from libs import compromised
+
+from plugins import isolate_host
 
 class DisableOwnKeyError(RuntimeError):
     """ Thrown when a request is made to disable the current key being used.  """
@@ -178,54 +181,6 @@ class AWS_IR(object):
         )
         return session
 
-    def create_aws_isolation_sg(self, region, vpc_id, instance_id):
-        client = connection.Connection(
-            type='client',
-            service='ec2',
-            region=region
-        ).connect()
-        session = self.get_aws_session(region=region)
-        description = "Lanched by AWS IR for Case " + self.case_number
-        sg_name = "isolation-sg-{case_number}-{instance}-{uuid}".format(
-            case_number=self.case_number,
-            instance=instance_id,
-            uuid=str(uuid.uuid4())
-        )
-        sg = client.create_security_group(
-            GroupName=sg_name, Description=description, VpcId=vpc_id
-        )
-        self.event_to_logs("Security Group Created " + sg['GroupId'])
-        ec2 = session.resource('ec2')
-        security_group_id = sg['GroupId']
-        isolate_sg = ec2.SecurityGroup(security_group_id)
-        isolate_sg.revoke_egress(IpPermissions=isolate_sg.ip_permissions_egress)
-        self.event_to_logs("Security Group Egress Access Revoked for " + sg['GroupId'])
-        return sg['GroupId']
-
-    def add_aws_isolation_sg_rule(
-        self,
-        security_group_id,
-        region,
-        authorized_cidr_range,
-        port,
-        proto
-    ):
-        session = self.get_aws_session(region=region)
-        ec2 = session.resource('ec2')
-        isolate_sg = ec2.SecurityGroup(security_group_id)
-        isolate_sg.authorize_ingress(
-            IpProtocol=proto,
-            CidrIp=authorized_cidr_range,
-            FromPort=port,
-            ToPort=port
-        )
-        self.event_to_logs(
-        "Access Ingress Added for proto={proto} from={port} to={port} cidr_range={authorized_cidr_range} for sg={sg}".format(
-            proto=proto,
-            port=port,
-            authorized_cidr_range=authorized_cidr_range,
-            sg=security_group_id
-        ))
 
     def get_aws_instance_metadata(self, instance_id, region):
         client = connection.Connection(
@@ -359,13 +314,7 @@ class AWS_IR(object):
         self.event_to_logs('Stopping instance: instance_id={0}'.format(instance_id))
         return response
 
-    def set_aws_instance_security_group(self, instance_id, sg, region):
-        session = self.get_aws_session(region=region)
-        ec2 = session.resource('ec2')
-        i = ec2.Instance(instance_id)
-        i.modify_attribute(Groups=[sg,])
-        self.event_to_logs('Shifted instance into isolate security group.')
-        pass
+
 
 
 class HostCompromise(AWS_IR):
@@ -396,30 +345,7 @@ class HostCompromise(AWS_IR):
         self.compromised_host_ip = compromised_host_ip
         super(HostCompromise, self).__init__(examiner_cidr_range, case_number=case_number, bucket=bucket)
 
-    def isolate(self):
-        """
-            - Create a new secrurity group.
-            - Add a rule to allow SSH from examiner IP.
-            - Apply the SG to our compromised instance.
-        """
-        # create security group
-        sg_id = self.create_aws_isolation_sg(
-            self.inventory_compromised_host['region'],
-            self.inventory_compromised_host['vpc_id'],
-            self.inventory_compromised_host['instance_id'],
-        )
-        self.add_aws_isolation_sg_rule(
-            sg_id,
-            self.inventory_compromised_host['region'],
-            self.examiner_cidr_range,
-            22,
-            'tcp'
-        )
-        self.set_aws_instance_security_group(
-            self.inventory_compromised_host['instance_id'],
-            sg_id,
-            self.inventory_compromised_host['region']
-        )
+
 
     def create_snapshots(self):
         volume_ids = self.inventory_compromised_host['volume_ids']
@@ -452,8 +378,27 @@ class HostCompromise(AWS_IR):
         self.setup()
 
         search = self.aws_inventory.locate_instance(self.compromised_host_ip)
+
         if search == None:
             raise ValueError('Compromised IP Address not found in inventory.')
+
+        compromised_resource = compromised.CompromisedMetadata(
+            compromised_object_inventory = search,
+            case_number=self.case_number,
+            type_of_compromise='host_compromise'
+        ).data()
+
+        client = connection.Connection(
+            type='client',
+            service='ec2',
+            region=compromised_resource['region']
+        ).connect()
+
+        isolate_host.Isolate(
+            client=client,
+            compromised_resource = compromised_resource,
+            dry_run=False
+        )
         #self.inventory_compromised_host = search
 
         #self.setup_bucket(self.inventory_compromised_host['region'])

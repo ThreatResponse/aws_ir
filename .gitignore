@@ -63,5 +63,5 @@ target/
 
 *.swp
 awsir/*.ko
-
+*.pem
 docs/_build
