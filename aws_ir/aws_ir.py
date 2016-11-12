@@ -394,17 +394,15 @@ class HostCompromise(AWS_IR):
             region=compromised_resource['region']
         ).connect()
 
+
+        self.setup_bucket(compromised_resource['region'])
+
+        # step 1 - isolate
         isolate_host.Isolate(
             client=client,
             compromised_resource = compromised_resource,
             dry_run=False
         )
-        #self.inventory_compromised_host = search
-
-        #self.setup_bucket(self.inventory_compromised_host['region'])
-
-        # step 1 - isolate
-        #self.isolate()
 
         # step 2 - apply compromised tag
         #self.add_incident_tag_to_instance(self.inventory_compromised_host)
