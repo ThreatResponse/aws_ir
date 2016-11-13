@@ -177,6 +177,7 @@ class AWS_IR(object):
             """Processing complete for {case_number}"""
         ).format(case_number=self.case_number, caller="aws_ir", region=region)
         print(processing_end_messaging)
+        sys.exit(0)
 
 class HostCompromise(AWS_IR):
     """ Procedures for responding to a HostCompromise.
@@ -309,8 +310,8 @@ class HostCompromise(AWS_IR):
         )
 
         self.teardown(
-            region=self.compromised_resource['region'],
-            resource_id=self.compromised_resource['instance_id']
+            region=compromised_resource['region'],
+            resource_id=compromised_resource['instance_id']
         )
 
 class KeyCompromise(AWS_IR):

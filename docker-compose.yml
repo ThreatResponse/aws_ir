@@ -6,6 +6,6 @@ services:
       - ~/.aws:/root/.aws
       - .:/aws_ir/
     environment:
-      - EDDA_SERVER=172.16.31.78
+      - EDDA_SERVER=192.168.1.83
       - EDDA_PORT=8080
       - EDDA_BASE_URL=/api/v2/
