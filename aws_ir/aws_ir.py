@@ -27,6 +27,7 @@ from plugins import gather_host
 from plugins import snapshotdisks_host
 from plugins import stop_host
 from plugins import disableaccess_key
+from plugins import revokests_key
 
 class MissingDependencyError(RuntimeError):
     """ Thrown when this program is missing a dependency. """
@@ -354,11 +355,25 @@ class KeyCompromise(AWS_IR):
         self.event_to_logs(
                 "Attempting key disable."
         )
+
+
         # step 1 - disable access key
         disableaccess_key.Disableaccess(
             client=client,
             compromised_resource = compromised_resource,
             dry_run=False
+        )
+
+
+        # step 2 - revoke and STS tokens issued prior to now
+        revokests_key.RevokeSTS(
+            client=client,
+            compromised_resource = compromised_resource,
+            dry_run=False
+        )
+
+        self.event_to_logs(
+                "STS Tokens revoked issued prior to NOW."
         )
 
         self.event_to_logs(

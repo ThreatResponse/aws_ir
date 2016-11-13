@@ -4,6 +4,6 @@
     "Effect": "Deny",
     "Action": "*",
     "Resource": "*",
-    "Condition": {"DateLessThan": {"aws:TokenIssueTime": "2014-05-07T23:47:00Z"}}
+    "Condition": {"DateLessThan": {"aws:TokenIssueTime": "{{ before_date }}"}}
   }
 }
