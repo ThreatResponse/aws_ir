@@ -8,10 +8,10 @@ class install(_install):
         _install.run(self)
 
 setup(name="aws_ir",
-      version="0.1.0",
+      version="0.1.1",
       author="Andrew Krug, Alex McCormack, Joel Ferrier",
       author_email="andrewkrug@gmail.com,developer@amccormack.net,joel@ferrier.io",
-      packages=["aws_ir", "aws_ir/libs"],
+      packages=["aws_ir", "aws_ir/libs", "aws_ir/plugins"],
       license="MIT",
       description="AWS Incident Response ToolKit",
       scripts=['bin/aws_ir'],
