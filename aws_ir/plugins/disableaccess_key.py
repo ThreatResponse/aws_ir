@@ -35,18 +35,26 @@ class Disableaccess(object):
         )
 
         for key in access_keys['AccessKeyMetadata']:
-            if (key['AccessKeyId'] == self.access_key_id) and (key['AccessKeyId'] == 'Inactive'):
+            if (key['AccessKeyId'] == self.access_key_id) and (key['Status'] == 'Inactive'):
                 return True
 
         return False
 
     def __disable_access_key(self, force_disable_self=False):
+        """This function first checks to see if the key is already disabled\
+        if not then it goes to disabling"""
         client = self.client
-
-        # we get the username for the key because even though username is optional
-        # if the username is not provided, the key will not be found, contrary to what
-        # the documentation says.
-        response = client.get_access_key_last_used(AccessKeyId=self.access_key_id)
-        username = response['UserName']
-
-        client.update_access_key(UserName=username, AccessKeyId=self.access_key_id, Status='Inactive')
+        #First check to see if the key is already disabled.
+        if self.validate == True:
+            return
+        else:
+            # we get the username for the key because even though username is optional
+            # if the username is not provided, the key will not be found, contrary to what
+            # the documentation says.
+            response = client.get_access_key_last_used(AccessKeyId=self.access_key_id)
+            username = response['UserName']
+            client.update_access_key(
+                UserName=username,
+                AccessKeyId=self.access_key_id,
+                Status='Inactive'
+            )
