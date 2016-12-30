@@ -13,12 +13,11 @@ class Disableaccess(object):
         dry_run
     ):
 
-        self.client = client
+        self.client = client #Requires an IAM Client
         self.compromised_resource = compromised_resource
         self.compromise_type = compromised_resource['compromise_type']
         self.dry_run = dry_run
 
-        self.session = self.__get_boto3_session()
         self.access_key_id = self.compromised_resource['access_key_id']
         self.setup()
 
@@ -26,14 +25,23 @@ class Disableaccess(object):
         if self.dry_run != True:
             self.__disable_access_key()
 
-    def __get_boto3_session(self):
-        session = boto3.Session(
-            region_name='us-east-1'
+    def validate(self):
+        """Returns whether this plugin does what it claims to have done"""
+        client = self.client
+        response = client.get_access_key_last_used(AccessKeyId=self.access_key_id)
+        username = response['UserName']
+        access_keys = client.list_access_keys(
+            UserName=username
         )
-        return session
+
+        for key in access_keys['AccessKeyMetadata']:
+            if (key['AccessKeyId'] == self.access_key_id) and (key['AccessKeyId'] == 'Inactive'):
+                return True
+
+        return False
 
     def __disable_access_key(self, force_disable_self=False):
-        client = self.session.client('iam')
+        client = self.client
 
         # we get the username for the key because even though username is optional
         # if the username is not provided, the key will not be found, contrary to what
