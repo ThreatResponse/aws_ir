@@ -22,6 +22,7 @@ class Disableaccess(object):
         self.setup()
 
     def setup(self):
+        """Method runs the plugin"""
         if self.dry_run != True:
             self.__disable_access_key()
 

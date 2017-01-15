@@ -1,6 +1,7 @@
 import datetime
 import boto3
 import os
+import fnmatch
 
 from jinja2 import Template
 
@@ -16,11 +17,11 @@ class RevokeSTS(object):
             self.compromised_resource = compromised_resource
             self.compromise_type = compromised_resource['compromise_type']
             self.dry_run = dry_run
-            self.session = self.__get_boto3_session()
 
             self.setup()
 
     def setup(self):
+        """Method runs the plugin attaching policies to the user in question"""
         if self.dry_run == False:
             username = self.__get_username_for_key()
             policy_document = self.__generate_inline_policy()
@@ -28,18 +29,31 @@ class RevokeSTS(object):
             pass
         pass
 
+    def validate(self):
+        """Checks the a policy is actually attached"""
+        for policy in self.__get_policies()['PolicyNames']:
+            if policy == "threatresponse-temporal-key-revocation":
+                return True
+            else:
+                pass
+        return False
+
+    def __get_policies(self):
+        """Returns all the policy names for a given user"""
+        username = self.__get_username_for_key()
+        policies = self.client.list_user_policies(
+            UserName=username
+        )
+        return policies
+
     def __get_date(self):
+        """Returns a date in zulu time"""
         now = datetime.datetime.utcnow().isoformat() + 'Z'
         return now
 
-    def __get_boto3_session(self):
-        session = boto3.Session(
-            region_name='us-east-1'
-        )
-        return session
-
     def __get_username_for_key(self):
-        client = self.session.client('iam')
+        """Find the user for a given access key"""
+        client = self.client
         response = client.get_access_key_last_used(
             AccessKeyId=self.compromised_resource['access_key_id']
         )
@@ -47,7 +61,9 @@ class RevokeSTS(object):
         return username
 
     def __generate_inline_policy(self):
-        template_name = './aws_ir/templates/deny-sts-before-time.json.j2'
+        """Renders a policy from a jinja template"""
+        template_name = self.__locate_file('deny-sts-before-time.json.j2')
+        print template_name
         template_file = open(template_name)
         template_contents = template_file.read()
         jinja_template = Template(template_contents)
@@ -57,10 +73,8 @@ class RevokeSTS(object):
         return policy_document
 
     def __attach_inline_policy(self, username, policy_document):
-        client = boto3.client(
-            'iam',
-            region_name='us-east-1'
-        )
+        """Attaches the policy to the user"""
+        client = self.client
 
         response = client.put_user_policy(
             UserName=username,
@@ -68,3 +82,10 @@ class RevokeSTS(object):
             PolicyDocument=policy_document
         )
         return response
+
+    def __locate_file(self, pattern, root=os.curdir):
+        '''Locate all files matching supplied filename pattern in and below
+        supplied root directory.'''
+        for path, dirs, files in os.walk(os.path.abspath(root)):
+            for filename in fnmatch.filter(files, pattern):
+                return os.path.join(path, filename)
