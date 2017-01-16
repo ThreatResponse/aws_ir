@@ -13,7 +13,8 @@ class Isolate(object):
         self.compromised_resource = compromised_resource
         self.compromise_type = compromised_resource['compromise_type']
         self.dry_run = dry_run
-        self.security_group = self.setup()
+
+        self.setup()
 
     def setup(self):
         sg = self.__create_isolation_security_group()
@@ -26,6 +27,13 @@ class Isolate(object):
             instance_shifted = self.__add_security_group_to_instance(sg)
         pass
 
+    def validate(self):
+        """Validate that the instance is in fact isolated"""
+        if self.sg_name != None:
+            return True
+        else:
+            return False
+
     def __create_isolation_security_group(self):
         try:
             security_group_result = self.client.create_security_group(
@@ -35,23 +43,24 @@ class Isolate(object):
                 VpcId=self.compromised_resource['vpc_id'],
 
             )
+
         except Exception as e:
-            if e.response['Error']['Message'] == """
-            Request would have succeeded, but DryRun flag is set.
-            """:
-                security_group_result['GroupId'] = None
-            else:
-                return e
+            try:
+                if e.response['Error']['Message'] == """
+                Request would have succeeded, but DryRun flag is set.
+                """:
+                    security_group_result['GroupId'] = None
+            except:
+                raise e
         return security_group_result['GroupId']
 
     def __revoke_egress(self, group_id):
         try:
-            session = boto3.Session(
-                region_name=self.compromised_resource['region']
+            response = self.client.revoke_security_group_egress(
+                DryRun=self.dry_run,
+                GroupId=group_id
             )
-            ec2 = session.resource('ec2')
-            sg = ec2.SecurityGroup(group_id)
-            sg.revoke_egress(IpPermissions=sg.ip_permissions_egress)
+
             return True
         except:
             return False
@@ -62,16 +71,18 @@ class Isolate(object):
             instance=self.compromised_resource['instance_id'],
             uuid=str(uuid.uuid4())
         )
+        self.sg_name = sg_name
         return sg_name
 
     def __add_security_group_to_instance(self, group_id):
         try:
-            session = boto3.Session(
-                region_name=self.compromised_resource['region']
+            response = self.client.modify_instance_attribute(
+                DryRun=self.dry_run,
+                InstanceId=self.compromised_resource['instance_id'],
+                Groups=[
+                    group_id,
+                ],
             )
-            ec2 = session.resource('ec2')
-            i = ec2.Instance(self.compromised_resource['instance_id'])
-            i.modify_attribute(Groups=[group_id,])
             return True
         except:
             return False
@@ -84,12 +95,13 @@ class Isolate(object):
             )
             return response['NetworkAcl']['NetworkAclId']
         except Exception as e:
-            if e.response['Error']['Message'] == """
-            Request would have succeeded, but DryRun flag is set.
-            """:
-                return None
-            else:
-                return e
+            try:
+                if e.response['Error']['Message'] == """
+                Request would have succeeded, but DryRun flag is set.
+                """:
+                    return None
+            except:
+                raise e
 
     def __add_network_acl_entry(self, acl_id):
         try:
@@ -106,9 +118,10 @@ class Isolate(object):
             )
             return True
         except Exception as e:
-            if e.response['Error']['Message'] == """
-            Request would have succeeded, but DryRun flag is set.
-            """:
-                return None
-            else:
-                return e
+            try:
+                if e.response['Error']['Message'] == """
+                Request would have succeeded, but DryRun flag is set.
+                """:
+                    return None
+            except:
+                raise e
