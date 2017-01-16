@@ -18,6 +18,35 @@ class Tag(object):
         self.__add_incident_tag_to_instance()
         return True
 
+    def validate(self):
+        response = self.client.describe_instances(
+                Filters=[
+                {
+                    'Name': 'instance-id',
+                    'Values': [
+                        self.compromised_resource['instance_id']
+                    ]
+                },
+                {
+                    'Name': 'instance-state-name',
+                    'Values': [
+                        'running',
+                        'pending'
+                    ]
+                },
+                {
+                    'Name': 'tag-key',
+                    'Values': [
+                        'cr-case-number'
+                    ]
+                },
+            ],
+        )
+        if len(response['Reservations'][0]['Instances']) > 0:
+            return True
+        else:
+            return False
+
     def __create_tags(self):
         tag = [
             {
@@ -38,9 +67,10 @@ class Tag(object):
                 Tags=self.__create_tags()
             )
         except Exception as e:
-            if e.response['Error']['Message'] == """
-            Request would have succeeded, but DryRun flag is set.
-            """:
-                return None
-            else:
+            try:
+                if e.response['Error']['Message'] == """
+                Request would have succeeded, but DryRun flag is set.
+                """:
+                    return None
+            except:
                 return e
