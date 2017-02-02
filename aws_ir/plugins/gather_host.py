@@ -21,6 +21,7 @@ class Gather(object):
         self.compromised_resource = compromised_resource
         self.compromise_type = compromised_resource['compromise_type']
         self.dry_run = dry_run
+        self.api = api
 
         """
             These attrs will only be set during API=True
@@ -60,7 +61,7 @@ class Gather(object):
         return metadata
 
     def __log_aws_instance_metadata(self, data):
-        if api == True:
+        if self.api == True:
             self.evidence['metadata.json'] = data
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-metadata.log").format(
@@ -77,7 +78,7 @@ class Gather(object):
         return output
 
     def __log_aws_instance_console_output(self, data):
-        if api == True:
+        if self.api == True:
             self.evidence['console.json'] = data
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-console.log").format(
@@ -92,8 +93,8 @@ class Gather(object):
                InstanceId=self.compromised_resource['instance_id'],
                WakeUp=True
         )
-        if api == True:
-            self.evidence['screenshot.jpg'] == response['ImageData']
+        if self.api == True:
+            self.evidence['screenshot.jpg'] = response['ImageData']
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-screenshot.jpg").format(
                 case_number=self.compromised_resource['case_number'],
