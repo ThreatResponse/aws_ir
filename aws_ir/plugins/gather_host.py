@@ -26,9 +26,7 @@ class Gather(object):
             These attrs will only be set during API=True
             Added for Readability and AWS_IR data persistence
         """
-        self.console = None
-        self.metadata = None
-        self.screenshot = None
+        self.evidence = {}
 
         self.setup()
 
@@ -42,6 +40,10 @@ class Gather(object):
             return True
         else:
             return False
+
+    def validate(self):
+        """ Can't really validate data gather """
+        return True
 
     def __get_aws_instance_metadata(self):
         metadata = self.client.describe_instances(
@@ -59,7 +61,7 @@ class Gather(object):
 
     def __log_aws_instance_metadata(self, data):
         if api == True:
-            self.metadata = data
+            self.evidence['metadata.json'] = data
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-metadata.log").format(
                 case_number=self.compromised_resource['case_number'],
@@ -76,7 +78,7 @@ class Gather(object):
 
     def __log_aws_instance_console_output(self, data):
         if api == True:
-            self.console = data
+            self.evidence['console.json'] = data
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-console.log").format(
                 case_number=self.compromised_resource['case_number'],
@@ -91,7 +93,7 @@ class Gather(object):
                WakeUp=True
         )
         if api == True:
-            self.screenshot == response['ImageData']
+            self.evidence['screenshot.jpg'] == response['ImageData']
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-screenshot.jpg").format(
                 case_number=self.compromised_resource['case_number'],
