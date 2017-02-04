@@ -1,6 +1,7 @@
 import boto3
 import uuid
 
+"""Class to create the cases s3 bucket for asset storage"""
 class CaseBucket(object):
     def __init__(self, case_number, region):
         self.region = region
