@@ -6,19 +6,20 @@ import argparse
 import logging
 import json
 
+#Add the AWS_IR Object
 import aws_ir
 
-class nullCli():
-    def __init__(self):
-        self.config = None
-        self.prog = None
+#Support for multiple incident plans coming soon
+from plans import key
+from plans import host
 
-
+"""Basic arg parser for AWS_IR cli"""
 class cli():
-
     def __init__(self):
-        self.config, self.prog = self.parse_args()
+        self.config,
+        self.prog = self.parse_args()
 
+    """Throw an error on missing modules"""
     def module_missing(self, module_name):
         try:
             __import__(module_name)
@@ -27,6 +28,7 @@ class cli():
         else:
             return False
 
+    """Parent parser for top level flags"""
     def parse_args(self):
         parser = argparse.ArgumentParser(
             description="""
@@ -129,12 +131,13 @@ class cli():
 
         return args, prog
 
+    """Logic to decide on host or key compromise"""
     def run(self):
         case_number = self.config.case_number
         bucket = self.config.bucket_id
         compromise_object = None
         if self.config.func == 'host_compromise':
-            hc = aws_ir.HostCompromise(
+            hc = plans.key.Compromise(
                 self.config.user,
                 self.config.ssh_key_file,
                 self.config.examiner_cidr_range,
@@ -150,7 +153,7 @@ class cli():
             except KeyboardInterrupt:
                 pass
         elif self.config.func == 'key_compromise':
-            kc = aws_ir.KeyCompromise(
+            kc = plans.host.Compromise(
                 self.config.examiner_cidr_range,
                 self.config.compromised_access_key_id,
                 case_number = self.config.case_number,
@@ -163,6 +166,7 @@ class cli():
                 kc.mitigate()
             except KeyboardInterrupt:
                 pass
+
 
 if __name__=='__main__':
    c = cli()
