@@ -27,54 +27,99 @@ Ensure aws credentials are configured under the user running aws_ir as documente
 
 Check back soon for an IAM policy featuring the minimum set of required permissions
 
+Optional Arguments
+******************
+
+.. code-block:: bash
+
+   $ aws_ir -h
+   usage: aws_ir [-h] [--case-number CASE_NUMBER]
+                 [--examiner-cidr-range EXAMINER_CIDR_RANGE]
+                 [--bucket-name BUCKET_NAME] [--dry-run]
+                 {host-compromise,key-compromise} ...
+   
+   Incident Response command line for Amazon Web Services. This command line
+   interface is designed to process host and key based incursions without delay
+   or error.
+   
+   positional arguments:
+     {host-compromise,key-compromise}
+       host-compromise
+       key-compromise
+   
+   optional arguments:
+     -h, --help            show this help message and exit
+   
+     --case-number CASE_NUMBER
+                           The case number to use., usually of the form
+                           "cr-16-053018-2d2d"
+     --examiner-cidr-range EXAMINER_CIDR_RANGE
+                           The IP/CIDR for the examiner and/or the tool. This
+                           will be added as the only allowed range in the
+                           isolated security group.
+     --bucket-name BUCKET_NAME
+                           Optional. The id of the s3 bucket to use. This must
+                           already exist
+     --dry-run             Dry run. Pass dry run parameter to perform API calls
+                           but will not modify any resources.
+
 Key Compromise
 **************
 
-The ``aws_ir`` subcommand ``key_compromise`` disables access keys in the case of a key compromise.
-It's arguments are the access key id and region in which the key was provisioned.
-The compromised access key is disabled via the AWS api.
+The ``aws_ir`` subcommand ``key-compromise`` disables access keys in the case of a key compromise.
+It's single argument is the access key id, he compromised key is disabled via the AWS api.
 
 .. code-block:: bash
 
-   $ aws_ir key_compromise -h
-   usage: aws_ir key_compromise [-h] compromised_access_key_id region
+   $ aws_ir key-compromise -h
+   usage: aws_ir key-compromise [-h] --access-key-id ACCESS_KEY_ID
+   
+   optional arguments:
+     -h, --help            show this help message and exit
+     --access-key-id ACCESS_KEY_ID
 
-Below is the output of running the ``key_compromise`` subcommand.
+Below is the output of running the ``key-compromise`` subcommand.
 
 .. code-block:: bash
 
-   $ aws_ir key_compromise AKIAJGOVL2FIYOG6YFIA us-west-2
+   $ aws_ir key-compromise --access-key-id AKIAJGOVL2FIYOG6YFIA
    2016-07-29 16:53:35,458 - aws_ir.cli - INFO - Initial connection to AmazonWebServices made.
    2016-07-29 16:53:42,772 - aws_ir.cli - INFO - Inventory AWS Regions Complete 11 found.
    2016-07-29 16:53:42,772 - aws_ir.cli - INFO - Inventory Availability Zones Complete 27 found.
    2016-07-29 16:53:42,773 - aws_ir.cli - INFO - Beginning inventory of instances world wide.  This might take a minute...
    2016-07-29 16:53:49,527 - aws_ir.cli - INFO - Inventory complete.  Proceeding to resource identification.
    2016-07-29 16:53:54,839 - aws_ir.cli - INFO - Set satus of access key AKIAJGOVL2FIYOG6YFIA to Inactive
-   Processing complete : Launch an analysis workstation with the command
-   
-                    aws_ir -n cr-16-072916-46a8 create_workstation us-west-2
+   Processing complete
 
 Host Compromise
 ***************
 
-The ``aws_ir`` subcommand ``host_compromise`` preserves forensic artifacts from a compromised host after isolating the host.
+The ``aws_ir`` subcommand ``host-compromise`` preserves forensic artifacts from a compromised host after isolating the host.
 Once all artifacts are collected and tagged the compromised instance is powered off.
-The ``host_compromise`` subcommand takes three arguments, the ``ip`` of the compromised host, a ``user`` with ssh access to the target instance, and the ``ssh_key_file`` used for authentication.
+The ``host-compromise`` subcommand takes three arguments, the ``instance-ip`` of the compromised host, a ``user`` with ssh access to the target instance, and the ``ssh-key`` used for authentication.
 
 Currently ``user`` must be capable of passwordless sudo for memory capture to complete.  If ``user`` does not have passwordless sudo capabilities all artifiacts save for the memory capture will be gathered.
 
 .. code-block:: bash
 
-   $ aws_ir host_compromise -h
-   usage: aws_ir host_compromise [-h] ip user ssh_key_file
+   $ aws_ir host-compromise -h
+   usage: aws_ir host-compromise [-h] --instance-ip INSTANCE_IP --user USER
+                                 --ssh-key SSH_KEY
+   
+   optional arguments:
+     -h, --help            show this help message and exit
+     --instance-ip INSTANCE_IP
+     --user USER           this is the privileged ssh user for acquiring memory
+                           from the instance.
+     --ssh-key SSH_KEY     provide the path to the ssh private key for the user.
 
 AWS IR saves all forensic artifacts except for disk snapshots in an s3 bucket created for each case.  Disk snapshots are tagged with the same case number as the rest of the rest of the artifacts.
 
-Below is the output of running the ``host_compromise`` subcommand.
+Below is the output of running the ``host-compromise`` subcommand.
 
 .. code-block:: bash
 
-   $ aws_ir host_compromise 52.42.254.41 ec2-user key.pem
+   $ aws_ir host-compromise --instance-ip 52.42.254.41 --user ec2-user --ssh-key key.pem
    2016-07-28 16:02:17,104 - aws_ir.cli - INFO - Initial connection to AmazonWebServices made.
    2016-07-28 16:02:23,741 - aws_ir.cli - INFO - Inventory AWS Regions Complete 11 found.
    2016-07-28 16:02:23,742 - aws_ir.cli - INFO - Inventory Availability Zones Complete 27 found.
@@ -104,40 +149,6 @@ Below is the output of running the ``host_compromise`` subcommand.
    
                    aws_ir -n cr-16-072816-a4d6 create_workstation us-west-2
 
-Launch Analysis Workstation
-***************************
-
-Once either the ``key_compromise`` or the ``host_compromise`` subcommands have been run an incident response workstation can be launched using the ``create_workstation`` subcommand.
-The ``create_workstation`` subcommand launches an incident response workstation running `Threat Response Web <https://github.com/ThreatResponse/threatresponse_web>`__.
-The full power of ``aws_ir`` is availible from the workstation, as well as additional insights about your AWS account.
-From the workstation additional hosts and keys can be processed, for more information about the post-processing completed by the workstation see the `Threat Response Web documentation <https://github.com/ThreatResponse/threatresponse_web>`__.
-
-To launch a workstation provide ``aws_ir`` with the case number generated from an earlier run and specify the region in which the workstation will be launched.
-
-
-.. code-block:: bash
-
-   $ aws_ir -n cr-16-072816-a4d6 create_workstation us-west-2
-   2016-07-28 16:23:09,813 - aws_ir.cli - INFO - Wrote new key to /tmp/cr-16-072816-a4d6HHjGB4.pem
-   2016-07-28 16:23:10,205 - aws_ir.cli - INFO - Found policy: cloudresponse_workstation-cr-16-072816-a4d6-us-west-2
-   2016-07-28 16:23:10,379 - aws_ir.cli - INFO - Created new security vpc vpc-afca9dcb
-   2016-07-28 16:23:10,614 - aws_ir.cli - INFO - Created new security group sg-184b1a7e
-   2016-07-28 16:23:10,986 - aws_ir.cli - INFO - Access Ingress Added for proto=tcp from=22 to=22 cidr_range=0.0.0.0/0 for sg=sg-184b1a7e
-   2016-07-28 16:23:11,137 - aws_ir.cli - INFO - Created new subnet with id subnet-271ec47f
-   2016-07-28 16:23:11,238 - aws_ir.cli - INFO - Created InternetGateway with ID igw-db6d95bf
-   2016-07-28 16:23:11,282 - aws_ir.cli - INFO - Attaching InternetGateway igw-db6d95bf to VPC vpc-afca9dcb
-   2016-07-28 16:23:11,282 - aws_ir.cli - INFO - Checking if InternetGateway igw-db6d95bf is attached to VPC vpc-afca9dcb
-   2016-07-28 16:23:12,218 - aws_ir.cli - INFO - Launching AMI ami-4c07c52c to instace id i-f70b612a
-   2016-07-28 16:23:13,505 - aws_ir.cli - INFO - Checking if instance i-f70b612a is running.
-   2016-07-28 16:23:14,578 - aws_ir.cli - INFO - Checking if instance i-f70b612a is running.
-   2016-07-28 16:23:15,637 - aws_ir.cli - INFO - Checking if instance i-f70b612a is running.
-   2016-07-28 16:23:16,689 - aws_ir.cli - INFO - Checking if instance i-f70b612a is running.
-   2016-07-28 16:23:35,863 - aws_ir.cli - INFO - Instance i-f70b612a is running at 52.43.1.39
-   2016-07-28 16:23:35,865 - aws_ir.cli - INFO - connect to the workstation instance with: ssh -i /tmp/cr-16-072816-a4d6HHjGB4.pem -L9999:127.0.0.1:9999 -L5000:127.0.0.1:5000 -L3000:127.0.0.1:3000 ec2-user@52.43.1.39
-   connect to the workstation instance with:
-    ssh -i /tmp/cr-16-072816-a4d6HHjGB4.pem -L9999:127.0.0.1:9999 -L5000:127.0.0.1:5000 -L3000:127.0.0.1:3000 ec2-user@52.43.1.39
-
-After the ``create_workstation`` command completes use the provided ssh command to mount the workstation's webapps to your local system.
 
 User Guide
 **********
