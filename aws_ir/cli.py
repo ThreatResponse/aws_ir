@@ -83,19 +83,24 @@ class cli():
         subparsers.required = True
 
         host_compromise_parser = subparsers.add_parser(
-            'host_compromise', help=''
+            'host-compromise', help=''
         )
 
-        host_compromise_parser.add_argument('ip', help='')
         host_compromise_parser.add_argument(
-            'user',
+            '--instance-ip',
+            required=True,
+            help='')
+        host_compromise_parser.add_argument(
+            '--user',
+            required=True,
             help="""
                 this is the privileged ssh user
                 for acquiring memory from the instance.
             """
         )
         host_compromise_parser.add_argument(
-            'ssh_key_file',
+            '--ssh-key',
+            required=True,
             help='provide the path to the ssh private key for the user.'
         )
         host_compromise_parser.set_defaults(func="host_compromise")
@@ -128,9 +133,9 @@ class cli():
         if self.config.func == 'host_compromise':
             hc = plans.key.Compromise(
                 self.config.user,
-                self.config.ssh_key_file,
+                self.config.ssh_key,
                 self.config.examiner_cidr_range,
-                self.config.ip,
+                self.config.instance_ip,
                 case_number = self.config.case_number,
                 bucket = self.config.bucket_name,
                 prog = self.prog
