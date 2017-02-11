@@ -4,9 +4,12 @@ import pytest
 import boto3
 import base64
 import os
+import sys
 
 from faker import Factory
-from aws_ir.aws_ir import aws_ir
+
+sys.path.append(os.getcwd()+"/aws_ir")
+from ..aws_ir import aws_ir
 
 CASE_NUMBER = '12345678'
 EXAMINER_CIDR_RANGE = "0.0.0.0/0"
