@@ -17,7 +17,7 @@ from plans import host
 class cli():
     def __init__(self):
         self.config = None
-        self.prog = sys.argv[0]
+        self.prog = sys.argv[0].split('/')[-1]
 
     """Throw an error on missing modules"""
     def module_missing(self, module_name):
