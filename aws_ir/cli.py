@@ -39,8 +39,9 @@ class cli():
             """
         )
 
-        parser.add_argument(
-            '-n',
+        optional_args = parser.add_argument_group()
+
+        optional_args.add_argument(
             '--case-number',
             default=None,
             help="""
@@ -48,8 +49,7 @@ class cli():
             """
         )
 
-        parser.add_argument(
-            '-e',
+        optional_args.add_argument(
             '--examiner-cidr-range',
             default='0.0.0.0/0',
             help="""
@@ -59,9 +59,8 @@ class cli():
             """
         )
 
-        parser.add_argument(
-            '-b',
-            '--bucket-id',
+        optional_args.add_argument(
+            '--bucket-name',
             default=None,
             help="""
                 Optional.
@@ -70,10 +69,9 @@ class cli():
             """
         )
 
-        parser.add_argument(
-            '-d',
+        optional_args.add_argument(
             '--dry-run',
-            default=None,
+            action='store_true',
             help="""
                 Dry run. Pass dry run
                 parameter to perform API calls
@@ -124,7 +122,7 @@ class cli():
     def run(self):
         self.config = self.parse_args(sys.argv[1:])
         case_number = self.config.case_number
-        bucket = self.config.bucket_id
+        bucket = self.config.bucket_name
         compromise_object = None
         if self.config.func == 'host_compromise':
             hc = plans.key.Compromise(
@@ -133,7 +131,7 @@ class cli():
                 self.config.examiner_cidr_range,
                 self.config.ip,
                 case_number = self.config.case_number,
-                bucket = self.config.bucket_id,
+                bucket = self.config.bucket_name,
                 prog = self.prog
             )
             case_number = hc.case_number
@@ -147,7 +145,7 @@ class cli():
                 self.config.examiner_cidr_range,
                 self.config.compromised_access_key_id,
                 case_number = self.config.case_number,
-                bucket = self.config.bucket_id,
+                bucket = self.config.bucket_name,
                 region = self.config.region
             )
             case_number = kc.case_number
