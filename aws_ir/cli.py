@@ -79,7 +79,8 @@ class cli():
             """
         )
 
-        subparsers = parser.add_subparsers()
+        subparsers = parser.add_subparsers(dest="compromise-type")
+        subparsers.required = True
 
         host_compromise_parser = subparsers.add_parser(
             'host_compromise', help=''
