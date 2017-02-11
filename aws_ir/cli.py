@@ -29,7 +29,8 @@ class cli():
             return False
 
     """Parent parser for top level flags"""
-    def parse_args(self):
+    def parse_args(self, args):
+
         parser = argparse.ArgumentParser(
             description="""
                 Incident Response command line for Amazon Web Services.
@@ -116,23 +117,12 @@ class cli():
 
         key_compromise_parser.set_defaults(func="key_compromise")
 
-        args = parser.parse_args()
+        return parser.parse_args(args)
 
-        try:
-            func = args.func
-        except AttributeError:
-            parser.print_usage()
-            print("no subcommand specified")
-
-        if parser.prog == 'cli.py':
-            prog = './'+parser.prog
-        else:
-            prog = parser.prog
-
-        return args, prog
 
     """Logic to decide on host or key compromise"""
     def run(self):
+        self.config = self.parse_args(sys.argv[1:])
         case_number = self.config.case_number
         bucket = self.config.bucket_id
         compromise_object = None
