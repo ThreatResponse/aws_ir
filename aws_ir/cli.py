@@ -16,8 +16,8 @@ from plans import host
 """Basic arg parser for AWS_IR cli"""
 class cli():
     def __init__(self):
-        self.config,
-        self.prog = self.parse_args()
+        self.config = None
+        self.prog = sys.argv[0]
 
     """Throw an error on missing modules"""
     def module_missing(self, module_name):
