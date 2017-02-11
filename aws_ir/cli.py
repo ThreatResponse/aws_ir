@@ -122,8 +122,6 @@ class cli():
     """Logic to decide on host or key compromise"""
     def run(self):
         self.config = self.parse_args(sys.argv[1:])
-        case_number = self.config.case_number
-        bucket = self.config.bucket_name
         compromise_object = None
         if self.config.func == 'host_compromise':
             hc = plans.key.Compromise(
