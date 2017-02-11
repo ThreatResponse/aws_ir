@@ -124,7 +124,7 @@ class cli():
         self.config = self.parse_args(sys.argv[1:])
         compromise_object = None
         if self.config.func == 'host_compromise':
-            hc = plans.key.Compromise(
+            hc = host.Compromise(
                 self.config.user,
                 self.config.ssh_key,
                 self.config.examiner_cidr_range,
@@ -140,7 +140,7 @@ class cli():
             except KeyboardInterrupt:
                 pass
         elif self.config.func == 'key_compromise':
-            kc = plans.host.Compromise(
+            kc = key.Compromise(
                 self.config.examiner_cidr_range,
                 self.config.access_key_id,
                 case_number = self.config.case_number,
