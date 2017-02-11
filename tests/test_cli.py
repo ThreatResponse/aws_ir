@@ -7,8 +7,6 @@ import os
 import sys
 import copy
 
-from faker import Factory
-
 sys.path.append(os.getcwd()+"/aws_ir")
 from ..aws_ir import cli
 
