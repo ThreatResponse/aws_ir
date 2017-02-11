@@ -106,17 +106,12 @@ class cli():
         host_compromise_parser.set_defaults(func="host_compromise")
 
         key_compromise_parser = subparsers.add_parser(
-            'key_compromise',
+            'key-compromise',
             help=''
         )
 
         key_compromise_parser.add_argument(
-            'compromised_access_key_id', help=''
-        )
-
-        key_compromise_parser.add_argument(
-            'region',
-            help='Choose a region to store your case logs.  Example: us-east-1'
+            '--access-key-id', required=True, help=''
         )
 
         key_compromise_parser.set_defaults(func="key_compromise")
@@ -149,10 +144,9 @@ class cli():
         elif self.config.func == 'key_compromise':
             kc = plans.host.Compromise(
                 self.config.examiner_cidr_range,
-                self.config.compromised_access_key_id,
+                self.config.access_key_id,
                 case_number = self.config.case_number,
-                bucket = self.config.bucket_name,
-                region = self.config.region
+                bucket = self.config.bucket_name
             )
             case_number = kc.case_number
             compromise_object = kc
