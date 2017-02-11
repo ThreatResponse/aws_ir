@@ -17,8 +17,6 @@ def cli_object():
     return cli_object
 
 def test_parse_args():
-    print(sys.path)
-    #assert(False)
     cli = cli_object()
     case_number = "cr-17-000001-2d2d"
     cidr_range = "0.0.0.0/0"
