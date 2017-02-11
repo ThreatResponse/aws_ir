@@ -46,12 +46,12 @@ def cleanup_case_buckets():
                             Bucket=bucket['Name']
                         )
 
-                        print bucket['Name']
-                        print "Removing bucket"
+                        print(bucket['Name'])
+                        print("Removing bucket")
                         pass
                 else:
                     pass
-                    #print "Nothing to delete"
+                    #print("Nothing to delete")
 
 
 @pytest.fixture
