@@ -6,7 +6,6 @@ import base64
 import os
 
 from faker import Factory
-from dotenv import Dotenv
 from aws_ir.aws_ir import aws_ir
 
 CASE_NUMBER = '12345678'
