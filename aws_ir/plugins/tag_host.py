@@ -12,28 +12,13 @@ class Tag(object):
         self.compromised_resource = compromised_resource
         self.compromise_type = compromised_resource['compromise_type']
         self.dry_run = dry_run
-        self.security_group = self.setup()
-
-    def setup(self):
-        self.__add_incident_tag_to_instance()
-        return True
+        self.tagged = self.__add_incident_tag_to_instance()
 
     def validate(self):
+        instance_id = self.compromised_resource['instance_id']
         response = self.client.describe_instances(
-                Filters=[
-                {
-                    'Name': 'instance-id',
-                    'Values': [
-                        self.compromised_resource['instance_id']
-                    ]
-                },
-                {
-                    'Name': 'instance-state-name',
-                    'Values': [
-                        'running',
-                        'pending'
-                    ]
-                },
+            InstanceIds=[instance_id],
+            Filters=[
                 {
                     'Name': 'tag-key',
                     'Values': [
@@ -42,7 +27,7 @@ class Tag(object):
                 },
             ],
         )
-        if len(response['Reservations'][0]['Instances']) > 0:
+        if len(response['Reservations']) > 0:
             return True
         else:
             return False
@@ -58,7 +43,6 @@ class Tag(object):
         return tag
 
     def __add_incident_tag_to_instance(self):
-        region = self.compromised_resource['region']
         instance_id = self.compromised_resource['instance_id']
         try:
             self.client.create_tags(
@@ -66,11 +50,14 @@ class Tag(object):
                 Resources=[instance_id],
                 Tags=self.__create_tags()
             )
+            return True
+
         except Exception as e:
-            try:
-                if e.response['Error']['Message'] == """
+            if e.response['Error']['Message'] == """
                 Request would have succeeded, but DryRun flag is set.
                 """:
-                    return None
-            except:
-                return e
+                return None
+            else:
+                raise e
+
+
