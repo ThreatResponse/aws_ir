@@ -7,11 +7,11 @@ import os
 
 from datetime import datetime, timedelta
 
-from libs import ts_logger
-from libs import s3bucket
-from libs import connection
-from libs import aws
-from libs import inventory
+from aws_ir.libs import ts_logger
+from aws_ir.libs import s3bucket
+from aws_ir.libs import connection
+from aws_ir.libs import aws
+from aws_ir.libs import inventory
 
 
 class Case(object):

@@ -6,11 +6,11 @@ import argparse
 import logging
 import json
 
-from libs import case
+from aws_ir.libs import case
 
 #Support for multiple incident plans coming soon
-from plans import key
-from plans import host
+from aws_ir.plans import key
+from aws_ir.plans import host
 
 """Basic arg parser for AWS_IR cli"""
 class cli():

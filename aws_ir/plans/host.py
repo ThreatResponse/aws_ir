@@ -1,14 +1,14 @@
 import os
 
-from libs import volatile
-from libs import compromised
-from libs import connection
+from aws_ir.libs import volatile
+from aws_ir.libs import compromised
+from aws_ir.libs import connection
 
-from plugins import isolate_host
-from plugins import tag_host
-from plugins import gather_host
-from plugins import snapshotdisks_host
-from plugins import stop_host
+from aws_ir.plugins import isolate_host
+from aws_ir.plugins import tag_host
+from aws_ir.plugins import gather_host
+from aws_ir.plugins import snapshotdisks_host
+from aws_ir.plugins import stop_host
 
 
 """Compromise class for Host Compromise"""

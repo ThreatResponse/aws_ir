@@ -1,9 +1,9 @@
 
-from libs import connection
-from libs import compromised
+from aws_ir.libs import connection
+from aws_ir.libs import compromised
 
-from plugins import disableaccess_key
-from plugins import revokests_key
+from aws_ir.plugins import disableaccess_key
+from aws_ir.plugins import revokests_key
 
 """Compromise class for Key Compromise Procedure"""
 class Compromise(object):
