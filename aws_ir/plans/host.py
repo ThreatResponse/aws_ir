@@ -60,7 +60,8 @@ class Compromise(object):
         compromised_resource = compromised.CompromisedMetadata(
             compromised_object_inventory = search,
             case_number=self.case.case_number,
-            type_of_compromise='host_compromise'
+            type_of_compromise='host_compromise',
+            examiner_cidr_range=self.case.examiner_cidr_range
         ).data()
 
         client = connection.Connection(

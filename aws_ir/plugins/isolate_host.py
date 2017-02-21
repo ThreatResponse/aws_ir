@@ -12,6 +12,7 @@ class Isolate(object):
         self.client = client
         self.compromised_resource = compromised_resource
         self.compromise_type = compromised_resource['compromise_type']
+        self.examiner_cidr_range = compromised_resource['examiner_cidr_range']
         self.dry_run = dry_run
 
         self.setup()
