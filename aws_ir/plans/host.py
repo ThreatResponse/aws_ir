@@ -114,7 +114,8 @@ class Compromise(object):
                 volatile_data = volatile.Memory(
                     client=client,
                     compromised_resource = compromised_resource,
-                    dry_run=False
+                    dry_run=False,
+                    verbose=self.logger.verbose
                 )
 
                 results = volatile_data.get_memory(
