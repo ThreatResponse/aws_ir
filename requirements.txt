@@ -1,7 +1,4 @@
-moto
-mock
-ping
-magicmock
+jinja2
 pytest
 pytest-cov
 boto3>=1.3.0
@@ -10,4 +7,4 @@ requests
 structlog
 pytz
 logutils
-margaritashotgun>=0.3.1
+margaritashotgun>=0.4.0

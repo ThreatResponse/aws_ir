@@ -1,23 +1,21 @@
 #!/usr/bin/env python
-import datetime
-import pprint
 import sys
 import argparse
-import logging
-import json
 
-import aws_ir
+from aws_ir import __version__
+from aws_ir.libs import case
 
-class nullCli():
+#Support for multiple incident plans coming soon
+from aws_ir.plans import key
+from aws_ir.plans import host
+
+"""Basic arg parser for AWS_IR cli"""
+class cli():
     def __init__(self):
         self.config = None
-        self.prog = None
+        self.prog = sys.argv[0].split('/')[-1]
 
-class cli():
-
-    def __init__(self):
-        self.config, self.prog = self.parse_args()
-
+    """Throw an error on missing modules"""
     def module_missing(self, module_name):
         try:
             __import__(module_name)
@@ -26,143 +24,150 @@ class cli():
         else:
             return False
 
-    def parse_args(self):
-        parser = argparse.ArgumentParser(description='TODO description')
+    """Parent parser for top level flags"""
+    def parse_args(self, args):
 
-        parser.add_argument('-n', '--case-number', default=None,
-            help='The case number to use., usually of the form "cr-16-053018-2d2d"'
-        )
-        parser.add_argument('-e','--examiner-cidr-range', default='0.0.0.0/0',
-            help='The IP/CIDR for the examiner and/or the tool. This will be added as the \
-                only allowed range in the isolated security group.'
-        )
-        parser.add_argument('-c', '--create-workstation', action='store_true',
-            help='Create a cloudresponse workstation.'
-        )
-        parser.add_argument('-k', '--key-name', default=None,
-            help='Optional. The name of the key to use when creating the workstation. If ommited, a new key is generated.'
-        )
-        parser.add_argument('-b', '--bucket-id', default=None,
-            help='Optional. The id of the s3 bucket to use. This must already exist'
+        parser = argparse.ArgumentParser(
+            description="""
+                Incident Response command line for Amazon Web Services.
+                This command line interface is designed to process host and key
+                based incursions without delay or error.
+            """
         )
 
+        optional_args = parser.add_argument_group()
 
+        optional_args.add_argument(
+            '--version',
+            action='version',
+            version="%(prog)s {ver}".format(ver=__version__))
 
-        subparsers = parser.add_subparsers()
+        optional_args.add_argument(
+            '--verbose',
+            action='store_true',
+            help='log debug messages')
+
+        optional_args.add_argument(
+            '--case-number',
+            default=None,
+            help="""
+                The case number to use., usually of the form "cr-16-053018-2d2d"
+            """
+        )
+
+        optional_args.add_argument(
+            '--examiner-cidr-range',
+            default='0.0.0.0/0',
+            help="""
+                The IP/CIDR for the examiner and/or the tool.
+                This will be added as the only allowed range
+                in the isolated security group.
+            """
+        )
+
+        optional_args.add_argument(
+            '--bucket-name',
+            default=None,
+            help="""
+                Optional.
+                The id of the s3 bucket to use.
+                This must already exist
+            """
+        )
+
+        optional_args.add_argument(
+            '--dry-run',
+            action='store_true',
+            help="""
+                Dry run. Pass dry run
+                parameter to perform API calls
+                but will not modify any resources.
+            """
+        )
+
+        subparsers = parser.add_subparsers(dest="compromise-type")
+        subparsers.required = True
 
         host_compromise_parser = subparsers.add_parser(
-            'host_compromise', help=''
+            'host-compromise', help=''
         )
 
-        host_compromise_parser.add_argument('ip', help='')
         host_compromise_parser.add_argument(
-            'user',
-            help='this is the privileged ssh user for acquiring memory from the instance.'
+            '--instance-ip',
+            required=True,
+            help='')
+        host_compromise_parser.add_argument(
+            '--user',
+            required=True,
+            help="""
+                this is the privileged ssh user
+                for acquiring memory from the instance.
+            """
         )
         host_compromise_parser.add_argument(
-            'ssh_key_file',
+            '--ssh-key',
+            required=True,
             help='provide the path to the ssh private key for the user.'
         )
         host_compromise_parser.set_defaults(func="host_compromise")
 
-        key_compromise_parser = subparsers.add_parser('key_compromise', help='')
-        key_compromise_parser.add_argument(
-            'compromised_access_key_id', help=''
+        key_compromise_parser = subparsers.add_parser(
+            'key-compromise',
+            help=''
         )
 
         key_compromise_parser.add_argument(
-            'region', help='Choose a region to store your case logs.  Example: us-east-1'
+            '--access-key-id', required=True, help=''
         )
 
         key_compromise_parser.set_defaults(func="key_compromise")
 
-        create_workstation_parser = subparsers.add_parser(
-            'create_workstation', help='Create an analysis workstartion'
-        )
+        return parser.parse_args(args)
 
-        create_workstation_parser.add_argument(
-            'region', help='Choose a launch region.  Example: create_workstation us-west-2'
-        )
 
-        create_workstation_parser.set_defaults(func="create_workstation")
-
-        args = parser.parse_args()
-
-        try:
-            func = args.func
-        except AttributeError:
-            parser.print_usage()
-            print("no subcommand specified")
-            return nullCli()
-
-        if args.func == 'create_workstation' and args.case_number is None:
-            parser.print_help()
-            return nullCli()
-            raise ValueError('create_workstation requires a --case-number be provided')
-
-        if parser.prog == 'cli.py':
-            prog = './'+parser.prog
-        else:
-            prog = parser.prog
-
-        return args, prog
-
+    """Logic to decide on host or key compromise"""
     def run(self):
-        case_number = self.config.case_number
-        bucket = self.config.bucket_id
+        self.config = self.parse_args(sys.argv[1:])
+        case_logger = case.Logger(add_handler=True, verbose=self.config.verbose)
+        case_logger.event_to_logs("Parsing successful proceeding to incident plan.")
         compromise_object = None
         if self.config.func == 'host_compromise':
-            hc = aws_ir.HostCompromise(
-                self.config.user,
-                self.config.ssh_key_file,
-                self.config.examiner_cidr_range,
-                self.config.ip,
-                case_number = self.config.case_number,
-                bucket = self.config.bucket_id,
-                prog = self.prog
+            hc = host.Compromise(
+                user = self.config.user,
+                ssh_key_file = self.config.ssh_key,
+                compromised_host_ip = self.config.instance_ip,
+                prog = self.prog,
+                case = case.Case(
+                    self.config.case_number,
+                    self.config.examiner_cidr_range,
+                    self.config.bucket_name
+
+                ),
+                logger = case_logger
             )
-            case_number = hc.case_number
             compromise_object = hc
             try:
                 hc.mitigate()
             except KeyboardInterrupt:
                 pass
         elif self.config.func == 'key_compromise':
-            kc = aws_ir.KeyCompromise(
+            kc = key.Compromise(
                 self.config.examiner_cidr_range,
-                self.config.compromised_access_key_id,
-                case_number = self.config.case_number,
-                bucket = self.config.bucket_id,
-                region = self.config.region
+                self.config.access_key_id,
+                case = case.Case(
+                    self.config.case_number,
+                    self.config.examiner_cidr_range,
+                    self.config.bucket_name
+
+                ),
+                logger = case_logger
             )
-            case_number = kc.case_number
+
             compromise_object = kc
             try:
                 kc.mitigate()
             except KeyboardInterrupt:
                 pass
-
-        if self.config.func == 'create_workstation' or self.config.create_workstation:
-            workstation = aws_ir.CreateWorkstation(
-                self.config.examiner_cidr_range,
-                key_name=self.config.key_name,
-                case_number=case_number,
-                region=self.config.region
-            )
-            workstation.create()
-
-    def test_stop_instance(self, test):
-        located = test.locate_instance(self.config.ip)
-        response = test.stop_instance(located['instance_id'], located['region'])
-        pprint.pprint(response)
-
-    def test_disable_access_key(self, test):
-        test.disable_access_key('us-east-1', self.config.compromised_access_key_id)
-
-    def test_snapshot_volumes(self, test):
-        vids = test.inventory[0]['volume_ids']
-        region = test.inventory[0]['region']
-        print(test.snapshot_volumes(vids, region))
 
 
 if __name__=='__main__':

@@ -1,6 +1,7 @@
 import boto3
 import uuid
 
+"""Class to create the cases s3 bucket for asset storage"""
 class CaseBucket(object):
     def __init__(self, case_number, region):
         self.region = region
@@ -27,6 +28,17 @@ class CaseBucket(object):
             self.__set_versioning(self.bucket_name)
             return bucket
         pass
+
+    def cleanup_empty_buckets(self):
+        buckets = self.client.list_buckets()
+        for bucket in buckets['Buckets']:
+            if str(bucket['Name']).find('cloud-response') != -1:
+                try:
+                    self.client.delete_bucket(Bucket=bucket['Name'])
+                    print(bucket['Name'])
+                except:
+                    pass
+
 
     def __generate_name(self):
         bucket_name = 'cloud-response-' + str(uuid.uuid4()).replace('-','')

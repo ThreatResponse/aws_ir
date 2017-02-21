@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Creates instance for aws_ir and incident-pony testing
+Resources:
+  IncidentInternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: Incident-Pony-Type
+          Value: AWS_IR-API
+  IncidentVPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsSupport: True
+      EnableDnsHostnames: True
+      Tags:
+        - Key: Incident-Pony-Type
+          Value: AWS_IR-API
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn: IncidentVPC
+    Properties:
+      VpcId:
+        Ref: IncidentVPC
+      InternetGatewayId:
+        Ref: IncidentInternetGateway
+  IncidentSubnet1:
+    Type: "AWS::EC2::Subnet"
+    DependsOn: IncidentVPC
+    Properties:
+      AvailabilityZone: "us-west-2a"
+      CidrBlock: "10.0.0.0/24"
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Incident-Pony-Type
+          Value: AWS_IR-API
+      VpcId:
+        Ref: IncidentVPC
+  IncidentSubnet2:
+    Type: "AWS::EC2::Subnet"
+    DependsOn: IncidentVPC
+    Properties:
+      AvailabilityZone: "us-west-2b"
+      CidrBlock: "10.0.1.0/24"
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Incident-Pony-Type
+          Value: AWS_IR-API
+      VpcId:
+        Ref: IncidentVPC
+  IncidentRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId:
+        Ref: IncidentVPC
+      Tags:
+        - Key: Incident-Pony-Type
+          Value: AWS_IR-API
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: IncidentInternetGateway
+    Properties:
+      RouteTableId:
+        Ref: IncidentRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: IncidentInternetGateway
+  IncidentSecGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    DependsOn: IncidentVPC
+    Properties:
+      GroupDescription: "Allows ports to test instance during incident pony run"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Incident-Pony-Type
+          Value: AWS_IR-API
+      VpcId:
+        Ref: IncidentVPC
+  #IncidentPonyIncidentTestRole:
+  #  Type: "AWS::IAM::Role"
+  #  Properties:
+  #    RoleName: IncidentPonyTestRole
+  IncidentInstance:
+    Type: "AWS::EC2::Instance"
+    DependsOn: IncidentSecGroup
+    Properties:
+      AvailabilityZone: 'us-west-2b'
+      ImageId: ami-1e299d7e
+      InstanceInitiatedShutdownBehavior: terminate
+      InstanceType: t2.nano
+      KeyName: incident-pony-response
+      SecurityGroupIds:
+        - Ref: IncidentSecGroup
+      SubnetId:
+        Ref: IncidentSubnet2
+      Tags:
+        - Key: Incident-Pony-Type
+          Value: AWS_IR-API
+        - Key: CostCenter
+          Value: FooBarXYZDept
+        - Key: SuspiciousExfilTag
+          Value: asdksdjhasdkjasiy==
+Outputs:
+  InstancePublicIp:
+    Value:
+      "Fn::GetAtt": [ IncidentInstance, PublicIp ]
