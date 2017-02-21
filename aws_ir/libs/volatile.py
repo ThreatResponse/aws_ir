@@ -30,10 +30,10 @@ class Memory(object):
                                     password = password,
                                     key = key) ],
                       workers = 'auto',
-                      logging = dict(log_dir = '/tmp/',
-                                     prefix = ("{case_number}-{ip}").format(
-                                                  ip=ip,
-                                                  case_number=case_number )),
+                      logging = { 'dir': '/tmp/',
+                                  'prefix':  ("{case_number}-{ip}").format(
+                                                ip=ip,
+                                                case_number=case_number ) },
                       repository = dict(enabled = True,
                                         url = ('https://threatresponse-lime'
                                                '-modules.s3.amazonaws.com/')))
