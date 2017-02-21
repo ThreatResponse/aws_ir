@@ -1,5 +1,4 @@
 import os
-from aws_ir import AWS_IR
 
 from libs import volatile
 from libs import compromised
@@ -119,11 +118,11 @@ class Compromise(object):
                 )
 
                 results = volatile_data.get_memory(
-                      bucket=self.bucket,
+                      bucket=self.case.case_bucket,
                       ip=self.compromised_host_ip,
                       user=self.user,
                       key=self.ssh_key_file_path,
-                      case_number=self.case_number
+                      case_number=self.case.case_number
                  )
 
                 self.logger.event_to_logs(("memory capture completed for: {0}, "

@@ -120,7 +120,7 @@ class cli():
 
     """Logic to decide on host or key compromise"""
     def run(self):
-        case_logger = case.Logger()
+        case_logger = case.Logger(add_handler=True)
         case_logger.event_to_logs("Parsing successful proceeding to incident plan.")
         self.config = self.parse_args(sys.argv[1:])
         compromise_object = None

@@ -31,7 +31,7 @@ class Case(object):
         else:
             self.case_bucket = self.__setup_bucket(region='us-west-2')
 
-        self.case_logger = Logger()
+        self.case_logger = Logger(self.case_number)
 
 
     def prep_aws_connections(self):
@@ -151,19 +151,24 @@ class Case(object):
 
 class Logger(object):
     """Case logger class for wrapping output formatters."""
-    def __init__(self):
+    def __init__(self, case_number=None, add_handler=False):
         """Setup the stream logger for the object"""
+        self.case_number = case_number
         self.logger = logging.getLogger('aws_ir.cli')
-
+        self.logger.setLevel(logging.INFO)
         streamhandler = logging.StreamHandler(sys.stdout)
 
-        self.logger.setLevel(logging.INFO)
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         )
 
-        streamhandler.setFormatter(formatter)
-        self.logger.addHandler(streamhandler)
+        if add_handler == True:
+            streamhandler.setFormatter(formatter)
+            self.logger.addHandler(streamhandler)
+        else:
+            pass
+            #There is already a stream handler
+
 
     def event_to_logs(self, message):
         """Use timesketch logger format to create custody chain"""
