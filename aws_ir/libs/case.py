@@ -32,6 +32,7 @@ class Case(object):
             self.case_bucket = self.__setup_bucket(region='us-west-2')
 
         self.case_logger = Logger(self.case_number)
+        self.examiner_cidr_range = examiner_cidr_range
 
 
     def prep_aws_connections(self):
