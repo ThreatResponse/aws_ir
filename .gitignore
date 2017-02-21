@@ -65,3 +65,4 @@ target/
 awsir/*.ko
 *.pem
 docs/_build
+*.ko
