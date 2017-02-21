@@ -2,6 +2,7 @@
 import sys
 import argparse
 
+from aws_ir import __version__
 from aws_ir.libs import case
 
 #Support for multiple incident plans coming soon
@@ -35,6 +36,11 @@ class cli():
         )
 
         optional_args = parser.add_argument_group()
+
+        optional_args.add_argument(
+            '--version',
+            action='version',
+            version="%(prog)s {ver}".format(ver=__version__))
 
         optional_args.add_argument(
             '--case-number',
