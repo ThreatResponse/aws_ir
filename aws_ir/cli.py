@@ -43,6 +43,11 @@ class cli():
             version="%(prog)s {ver}".format(ver=__version__))
 
         optional_args.add_argument(
+            '--verbose',
+            action='store_true',
+            help='log debug messages')
+
+        optional_args.add_argument(
             '--case-number',
             default=None,
             help="""
@@ -122,9 +127,9 @@ class cli():
 
     """Logic to decide on host or key compromise"""
     def run(self):
-        case_logger = case.Logger(add_handler=True)
-        case_logger.event_to_logs("Parsing successful proceeding to incident plan.")
         self.config = self.parse_args(sys.argv[1:])
+        case_logger = case.Logger(add_handler=True, verbose=self.config.verbose)
+        case_logger.event_to_logs("Parsing successful proceeding to incident plan.")
         compromise_object = None
         if self.config.func == 'host_compromise':
             hc = host.Compromise(

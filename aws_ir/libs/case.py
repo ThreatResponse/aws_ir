@@ -151,11 +151,15 @@ class Case(object):
 
 class Logger(object):
     """Case logger class for wrapping output formatters."""
-    def __init__(self, case_number=None, add_handler=False):
+    def __init__(self, case_number=None, add_handler=False, verbose=False):
         """Setup the stream logger for the object"""
         self.case_number = case_number
         self.logger = logging.getLogger('aws_ir.cli')
-        self.logger.setLevel(logging.INFO)
+        self.verbose = verbose
+        if self.verbose:
+            self.logger.setLevel(logging.DEBUG)
+        else:
+            self.logger.setLevel(logging.INFO)
         streamhandler = logging.StreamHandler(sys.stdout)
 
         formatter = logging.Formatter(
