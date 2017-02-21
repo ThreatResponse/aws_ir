@@ -1,10 +1,6 @@
 #!/usr/bin/env python
-import datetime
-import pprint
 import sys
 import argparse
-import logging
-import json
 
 from aws_ir.libs import case
 
