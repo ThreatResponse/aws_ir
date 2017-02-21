@@ -1,16 +1,32 @@
+import os
+from aws_ir import AWS_IR
+
+from libs import volatile
+from libs import compromised
+from libs import connection
+
+from plugins import isolate_host
+from plugins import tag_host
+from plugins import gather_host
+from plugins import snapshotdisks_host
+from plugins import stop_host
+
+
 """Compromise class for Host Compromise"""
 class Compromise(object):
     """ Procedures for responding to a HostCompromise.
         ** For now, assume only Linux system.
     """
-    def __init__(self,
-            user, ssh_key_file,
-            examiner_cidr_range='0.0.0.0/0',
+    def __init__(
+            self,
+            user=None,
+            ssh_key_file=None,
             compromised_host_ip=None,
-            case_number=None,
-            bucket=None,
-            prog=None
+            prog=None,
+            case=None,
+            logger=None
         ):
+
 
         if compromised_host_ip==None:
             raise ValueError(
@@ -30,19 +46,21 @@ class Compromise(object):
         self.case_type = 'Host'
 
         self.compromised_host_ip = compromised_host_ip
-        super(HostCompromise, self).__init__(examiner_cidr_range, case_number=case_number, bucket=bucket)
+        self.case = case
+        self.logger = logger
 
     def mitigate(self):
-        self.setup()
 
-        search = self.aws_inventory.locate_instance(self.compromised_host_ip)
+        self.case.prep_aws_connections()
+
+        search = self.case.aws_inventory.locate_instance(self.compromised_host_ip)
 
         if search == None:
             raise ValueError('Compromised IP Address not found in inventory.')
 
         compromised_resource = compromised.CompromisedMetadata(
             compromised_object_inventory = search,
-            case_number=self.case_number,
+            case_number=self.case.case_number,
             type_of_compromise='host_compromise'
         ).data()
 
@@ -51,9 +69,6 @@ class Compromise(object):
             service='ec2',
             region=compromised_resource['region']
         ).connect()
-
-
-        self.setup_bucket(compromised_resource['region'])
 
 
         # step 1 - isolate
@@ -87,9 +102,9 @@ class Compromise(object):
 
         # step 5 - gather memory
         if compromised_resource['platform'] == 'windows':
-            self.event_to_logs('Platform is Windows skipping live memory')
+            self.logger.event_to_logs('Platform is Windows skipping live memory')
         else:
-            self.event_to_logs(
+            self.logger.event_to_logs(
                 "Attempting run margarita shotgun for {user} on {ip} with {keyfile}".format(
                     user=self.user,
                     ip=self.compromised_host_ip,
@@ -111,7 +126,7 @@ class Compromise(object):
                       case_number=self.case_number
                  )
 
-                self.event_to_logs(("memory capture completed for: {0}, "
+                self.logger.event_to_logs(("memory capture completed for: {0}, "
                                     "failed for: {1}".format(results['completed'],
                                                              results['failed'])))
             except Exception as ex:
@@ -119,7 +134,7 @@ class Compromise(object):
                 if isinstance(ex, KeyboardInterrupt):
                     raise
                 else:
-                    self.event_to_logs(
+                    self.logger.event_to_logs(
                         (
                             "Memory acquisition failure with exception"
                               "{exception}. ".format(
@@ -135,7 +150,7 @@ class Compromise(object):
             dry_run=False
         )
 
-        self.teardown(
+        self.case.teardown(
             region=compromised_resource['region'],
             resource_id=compromised_resource['instance_id']
         )

@@ -1,13 +1,19 @@
 
+from libs import connection
+from libs import compromised
+
+from plugins import disableaccess_key
+from plugins import revokests_key
+
 """Compromise class for Key Compromise Procedure"""
 class Compromise(object):
 
     def __init__(self,
             examiner_cidr_range='0.0.0.0/0',
             compromised_access_key_id=None,
-            case_number=None,
-            bucket=None,
-            region=None
+            region='us-west-2',
+            case=None,
+            logger=None
         ):
 
         if compromised_access_key_id==None:
@@ -18,33 +24,29 @@ class Compromise(object):
         self.case_type = 'Key'
         self.compromised_access_key_id = compromised_access_key_id
         self.region = region
-        super(KeyCompromise, self).__init__(
-            examiner_cidr_range,
-            case_number=case_number,
-            bucket=bucket
-        )
+        self.case = case
+        self.logger = logger
+
 
     def mitigate(self):
-        self.setup()
-        self.setup_bucket(region=self.region)
-
+        """Any steps that run as part of key compromises."""
         access_key = self.compromised_access_key_id
         compromised_resource = compromised.CompromisedMetadata(
             compromised_object_inventory = {
                 'access_key_id': access_key,
                 'region': self.region
             },
-            case_number=self.case_number,
+            case_number=self.case.case_number,
             type_of_compromise='key_compromise'
         ).data()
 
         client = connection.Connection(
             type='client',
-            service='ec2',
+            service='iam',
             region=compromised_resource['region']
         ).connect()
 
-        self.event_to_logs(
+        self.logger.event_to_logs(
                 "Attempting key disable."
         )
 
@@ -64,15 +66,15 @@ class Compromise(object):
             dry_run=False
         )
 
-        self.event_to_logs(
+        self.logger.event_to_logs(
                 "STS Tokens revoked issued prior to NOW."
         )
 
-        self.event_to_logs(
+        self.logger.event_to_logs(
                 "Disable complete.  Uploading results."
         )
 
-        self.teardown(
+        self.case.teardown(
             region=self.region,
             resource_id=self.compromised_access_key_id
         )

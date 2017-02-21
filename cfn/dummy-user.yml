@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Creates insecureDave account for AWS_IR Testing
+Resources:
+  InsecureDave:
+    Type: AWS::IAM::User
+    Properties:
+      Path: "/"
+      LoginProfile:
+        Password: myP@ssW0rd
+      Tags:
+        - Key: Incident-Pony-Type
+          Value: AWS_IR-API
+  InsecureDaveKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName:
+        Ref: InsecureDave
+Outputs:
+  AccessKeyId:
+    Value:
+      Ref: InsecureDaveKey

@@ -29,6 +29,17 @@ class CaseBucket(object):
             return bucket
         pass
 
+    def cleanup_empty_buckets(self):
+        buckets = self.client.list_buckets()
+        for bucket in buckets['Buckets']:
+            if str(bucket['Name']).find('cloud-response') != -1:
+                try:
+                    self.client.delete_bucket(Bucket=bucket['Name'])
+                    print(bucket['Name'])
+                except:
+                    pass
+
+
     def __generate_name(self):
         bucket_name = 'cloud-response-' + str(uuid.uuid4()).replace('-','')
         return bucket_name

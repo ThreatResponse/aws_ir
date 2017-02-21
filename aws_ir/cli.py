@@ -6,8 +6,7 @@ import argparse
 import logging
 import json
 
-#Add the AWS_IR Object
-import aws_ir
+from libs import case
 
 #Support for multiple incident plans coming soon
 from plans import key
@@ -121,19 +120,24 @@ class cli():
 
     """Logic to decide on host or key compromise"""
     def run(self):
+        case_logger = case.Logger()
+        case_logger.event_to_logs("Parsing successful proceeding to incident plan.")
         self.config = self.parse_args(sys.argv[1:])
         compromise_object = None
         if self.config.func == 'host_compromise':
             hc = host.Compromise(
-                self.config.user,
-                self.config.ssh_key,
-                self.config.examiner_cidr_range,
-                self.config.instance_ip,
-                case_number = self.config.case_number,
-                bucket = self.config.bucket_name,
-                prog = self.prog
+                user = self.config.user,
+                ssh_key_file = self.config.ssh_key,
+                compromised_host_ip = self.config.instance_ip,
+                prog = self.prog,
+                case = case.Case(
+                    self.config.case_number,
+                    self.config.examiner_cidr_range,
+                    self.config.bucket_name
+
+                ),
+                logger = case_logger
             )
-            case_number = hc.case_number
             compromise_object = hc
             try:
                 hc.mitigate()
@@ -143,10 +147,15 @@ class cli():
             kc = key.Compromise(
                 self.config.examiner_cidr_range,
                 self.config.access_key_id,
-                case_number = self.config.case_number,
-                bucket = self.config.bucket_name
+                case = case.Case(
+                    self.config.case_number,
+                    self.config.examiner_cidr_range,
+                    self.config.bucket_name
+
+                ),
+                logger = case_logger
             )
-            case_number = kc.case_number
+
             compromise_object = kc
             try:
                 kc.mitigate()

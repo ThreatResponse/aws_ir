@@ -63,7 +63,6 @@ class RevokeSTS(object):
     def __generate_inline_policy(self):
         """Renders a policy from a jinja template"""
         template_name = self.__locate_file('deny-sts-before-time.json.j2')
-        print(template_name)
         template_file = open(template_name)
         template_contents = template_file.read()
         jinja_template = Template(template_contents)

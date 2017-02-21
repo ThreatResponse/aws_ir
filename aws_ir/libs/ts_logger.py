@@ -96,6 +96,3 @@ class timesketch_logger(object):
                w.write("]")
                w.close()
         write_log_event(event[1])
-
-if __name__=='__main__':
-    c = timesketch_logger("foo to the bar", "4")
