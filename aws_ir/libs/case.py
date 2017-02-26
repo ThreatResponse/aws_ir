@@ -8,6 +8,7 @@ import os
 
 from datetime import datetime, timedelta
 
+import aws_ir
 from aws_ir.libs import s3bucket
 from aws_ir.libs import connection
 from aws_ir.libs import aws
@@ -108,7 +109,7 @@ class Case(object):
     def teardown(self, region, resource_id):
         """ Any final post mitigation steps universal to all plans. """
         try:
-            self.case_logger.terminate_log_file()
+            aws_ir.wrap_log_file(self.case_number)
             self.__rename_log_file(self.case_number, resource_id)
             self.copy_logs_to_s3()
             processing_end_messaging = (

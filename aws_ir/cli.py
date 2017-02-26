@@ -146,6 +146,7 @@ class cli():
         aws_ir.set_file_logger(case_obj.case_number, level=log_level)
         logger = logging.getLogger(__name__)
 
+        aws_ir.wrap_log_file(case_obj.case_number)
         case_logger = case.Logger(add_handler=True, case_number=case_obj.case_number, verbose=self.config.verbose)
         logger.info("Initialization successful proceeding to incident plan.")
         compromise_object = None
