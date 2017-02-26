@@ -128,7 +128,14 @@ class cli():
     """Logic to decide on host or key compromise"""
     def run(self):
         self.config = self.parse_args(sys.argv[1:])
-        case_logger = case.Logger(add_handler=True, verbose=self.config.verbose)
+
+        case_obj = case.Case(
+            self.config.case_number,
+            self.config.examiner_cidr_range,
+            self.config.bucket_name
+        )
+
+        case_logger = case.Logger(add_handler=True, case_number=case_obj.case_number, verbose=self.config.verbose)
         case_logger.event_to_logs("Parsing successful proceeding to incident plan.")
         compromise_object = None
         if self.config.func == 'host_compromise':
@@ -137,12 +144,7 @@ class cli():
                 ssh_key_file = self.config.ssh_key,
                 compromised_host_ip = self.config.instance_ip,
                 prog = self.prog,
-                case = case.Case(
-                    self.config.case_number,
-                    self.config.examiner_cidr_range,
-                    self.config.bucket_name
-
-                ),
+                case = case_obj,
                 logger = case_logger
             )
             compromise_object = hc
@@ -154,12 +156,7 @@ class cli():
             kc = key.Compromise(
                 self.config.examiner_cidr_range,
                 self.config.access_key_id,
-                case = case.Case(
-                    self.config.case_number,
-                    self.config.examiner_cidr_range,
-                    self.config.bucket_name
-
-                ),
+                case = case_obj,
                 logger = case_logger
             )
 
