@@ -103,8 +103,7 @@ class Case(object):
 
     def copy_logs_to_s3(self, bucket):
         """Convinience function to put all case logs to s3 at the end"""
-        s3 = boto3.resource('s3')
-        case_bucket = s3.Bucket(self.bucket)
+        case_bucket = self.__get_case_bucket()
         logs = self.get_case_logs()
         for log in logs:
             case_bucket.upload_file(str("/tmp/" + log), log)
@@ -141,6 +140,14 @@ class Case(object):
         ).bucket.name
 
         return bucket_name
+
+
+    def __get_case_bucket(self):
+        client = connection.Connection(
+            type='resource',
+            service='s3'
+        ).connect()
+        return client.Bucket(self.case_bucket)
 
 
     def __generate_case_number(self):
