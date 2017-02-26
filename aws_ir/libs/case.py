@@ -121,8 +121,12 @@ class Case(object):
             print(processing_end_messaging)
             sys.exit(0)
         except Exception as e:
-            sys.exit(0)
-            raise
+            self.case_logger.event_to_logs(
+                ("Error uploading case logs for {case_number} to s3 "
+                 "bucket {case_bucket}: {ex}".format(case_number=self.case_number,
+                                                     case_bucket=self.case_bucket,
+                                                     ex=e)))
+            sys.exit(1)
 
 
     def get_case_logs(self):
