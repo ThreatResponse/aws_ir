@@ -114,8 +114,10 @@ class Case(object):
             self.__rename_log_file(self.case_number, resource_id)
             self.copy_logs_to_s3()
             processing_end_messaging = (
-                """Processing complete for {case_number}"""
-            ).format(case_number=self.case_number)
+                """Processing complete for {case_number}\n"""
+                """Artifacts stored in s3://{case_bucket}"""
+            ).format(case_number=self.case_number,
+                     case_bucket=self.case_bucket)
             print(processing_end_messaging)
             sys.exit(0)
         except Exception as e:
