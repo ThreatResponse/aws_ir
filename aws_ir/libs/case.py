@@ -34,7 +34,6 @@ class Case(object):
         else:
             self.case_bucket = self.__setup_bucket(region='us-west-2')
 
-        self.case_logger = Logger(self.case_number)
         self.examiner_cidr_range = examiner_cidr_range
 
 
@@ -161,45 +160,3 @@ class Case(object):
             ).format(
                 random.randint(0,2**16)
         )
-
-class Logger(object):
-    """Case logger class for wrapping output formatters."""
-    def __init__(self, case_number=None, add_handler=False, verbose=False,
-                 desc="AWS_IR Action"):
-        """Setup the stream logger for the object"""
-        self.case_number = case_number
-        self.logger = logging.getLogger('aws_ir.cli')
-        self.verbose = verbose
-        if self.verbose:
-            self.logger.setLevel(logging.DEBUG)
-        else:
-            self.logger.setLevel(logging.INFO)
-
-        self.log_file = "/tmp/{case_number}-aws_ir.log".format(
-                            case_number=self.case_number
-                        )
-
-        if add_handler == True:
-
-            self.__stub_log_file()
-        else:
-            pass
-            #There is already a stream handler
-
-    def __get_times(self):
-        tm = int(time.time())
-        dt = datetime.utcfromtimestamp(tm).isoformat()
-        times = {'unixtime': tm, 'isotime': dt}
-        return times
-
-    def __stub_log_file(self):
-        with open(self.log_file, 'w+') as f:
-            f.write("[\n")
-            f.flush()
-            f.close()
-
-    def terminate_log_file(self):
-        with open(self.log_file, 'a') as f:
-            f.write(']')
-            f.flush()
-            f.close()

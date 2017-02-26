@@ -25,8 +25,7 @@ class Compromise(object):
             ssh_key_file=None,
             compromised_host_ip=None,
             prog=None,
-            case=None,
-            logger=None
+            case=None
         ):
 
 
@@ -49,7 +48,6 @@ class Compromise(object):
 
         self.compromised_host_ip = compromised_host_ip
         self.case = case
-        self.logger = logger
 
     def mitigate(self):
 
@@ -117,8 +115,7 @@ class Compromise(object):
                 volatile_data = volatile.Memory(
                     client=client,
                     compromised_resource = compromised_resource,
-                    dry_run=False,
-                    verbose=self.logger.verbose
+                    dry_run=False
                 )
 
                 results = volatile_data.get_memory(

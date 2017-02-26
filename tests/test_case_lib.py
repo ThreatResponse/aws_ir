@@ -15,10 +15,7 @@ def test_object_init():
         examiner_cidr_range='0.0.0.0/0'
     )
 
-    l = case.Logger()
-
     assert c is not None
-    assert l is not None
 
 
 def teardown_test():

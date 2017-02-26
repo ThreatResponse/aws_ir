@@ -1,19 +1,26 @@
+import logging
 import margaritashotgun
+
+logger = logging.getLogger(__name__)
+
 
 class Memory(object):
     def __init__(
         self,
         compromised_resource,
         dry_run,
-        client=None,
-        verbose=False
+        client=None
     ):
 
         self.client = client
         self.compromised_resource = compromised_resource
         self.compromise_type = compromised_resource['compromise_type']
         self.dry_run = dry_run
-        self.verbose = verbose
+        # Check if logging level is set to logging.DEBUG
+        if logger.getEffectiveLevel() < logging.INFO:
+            self.verbose = True
+        else:
+            self.verbose = False
 
     def get_memory(
         self,

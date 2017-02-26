@@ -16,8 +16,7 @@ class Compromise(object):
             examiner_cidr_range='0.0.0.0/0',
             compromised_access_key_id=None,
             region='us-west-2',
-            case=None,
-            logger=None
+            case=None
         ):
 
         if compromised_access_key_id==None:
@@ -29,7 +28,6 @@ class Compromise(object):
         self.compromised_access_key_id = compromised_access_key_id
         self.region = region
         self.case = case
-        self.logger = logger
 
 
     def mitigate(self):

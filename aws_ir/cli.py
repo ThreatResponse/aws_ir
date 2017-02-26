@@ -147,7 +147,6 @@ class cli():
         logger = logging.getLogger(__name__)
 
         aws_ir.wrap_log_file(case_obj.case_number)
-        case_logger = case.Logger(add_handler=True, case_number=case_obj.case_number, verbose=self.config.verbose)
         logger.info("Initialization successful proceeding to incident plan.")
         compromise_object = None
         if self.config.func == 'host_compromise':
@@ -156,8 +155,7 @@ class cli():
                 ssh_key_file = self.config.ssh_key,
                 compromised_host_ip = self.config.instance_ip,
                 prog = self.prog,
-                case = case_obj,
-                logger = case_logger
+                case = case_obj
             )
             compromise_object = hc
             try:
@@ -168,8 +166,7 @@ class cli():
             kc = key.Compromise(
                 self.config.examiner_cidr_range,
                 self.config.access_key_id,
-                case = case_obj,
-                logger = case_logger
+                case = case_obj
             )
 
             compromise_object = kc
