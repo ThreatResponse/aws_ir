@@ -111,6 +111,7 @@ class Case(object):
     def teardown(self, region, resource_id):
         """ Any final post mitigation steps universal to all plans. """
         try:
+            self.case_logger.terminate_log_file()
             self.__rename_log_file(self.case_number, resource_id)
             self.copy_logs_to_s3()
             processing_end_messaging = (
@@ -188,6 +189,7 @@ class Logger(object):
             streamhandler.setFormatter(streamFormatter)
             self.logger.addHandler(streamhandler)
 
+            self.__stub_log_file()
             fileHandler = logging.FileHandler(self.log_file, mode='a')
             fileFormatter = logging.Formatter(
                 "\t{'timestamp': %(unixtime)s, 'message': '%(message)s', " +
@@ -204,6 +206,18 @@ class Logger(object):
         dt = datetime.utcfromtimestamp(tm).isoformat()
         times = {'unixtime': tm, 'isotime': dt}
         return times
+
+    def __stub_log_file(self):
+        with open(self.log_file, 'w+') as f:
+            f.write("[\n")
+            f.flush()
+            f.close()
+
+    def terminate_log_file(self):
+        with open(self.log_file, 'a') as f:
+            f.write(']')
+            f.flush()
+            f.close()
 
     def event_to_logs(self, message):
         """Use timesketch logger format to create custody chain"""
