@@ -64,4 +64,4 @@ class NullHandler(logging.Handler):
         pass
 
 logging.setLoggerClass(TimesketchLogger)
-logging.getLogger('margaritashotgun').addHandler(NullHandler())
+logging.getLogger('aws_ir').addHandler(NullHandler())
