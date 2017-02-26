@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import sys
 import argparse
+import logging
 
+import aws_ir
 from aws_ir import __version__
 from aws_ir.libs import case
 
@@ -135,6 +137,13 @@ class cli():
             self.config.bucket_name
         )
 
+        if self.config.verbose:
+            log_level = logging.DEBUG;
+        else:
+            log_level = logging.INFO
+
+        aws_ir.set_stream_logger(level=log_level)
+        aws_ir.set_file_logger(case_obj.case_number, level=log_level)
         case_logger = case.Logger(add_handler=True, case_number=case_obj.case_number, verbose=self.config.verbose)
         case_logger.event_to_logs("Parsing successful proceeding to incident plan.")
         compromise_object = None

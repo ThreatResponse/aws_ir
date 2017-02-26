@@ -182,21 +182,8 @@ class Logger(object):
                         )
 
         if add_handler == True:
-            streamhandler = logging.StreamHandler(sys.stdout)
-            streamFormatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-            )
-            streamhandler.setFormatter(streamFormatter)
-            self.logger.addHandler(streamhandler)
 
             self.__stub_log_file()
-            fileHandler = logging.FileHandler(self.log_file, mode='a')
-            fileFormatter = logging.Formatter(
-                "\t{'timestamp': %(unixtime)s, 'message': '%(message)s', " +
-                "desc: '{desc}', 'datetime': '%(isotime)s'}},".format(desc=desc)
-            )
-            fileHandler.setFormatter(fileFormatter)
-            self.logger.addHandler(fileHandler)
         else:
             pass
             #There is already a stream handler
