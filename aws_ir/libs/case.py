@@ -3,6 +3,7 @@
 import random
 import logging
 import sys
+import time
 import os
 
 from datetime import datetime, timedelta
@@ -164,7 +165,8 @@ class Case(object):
 
 class Logger(object):
     """Case logger class for wrapping output formatters."""
-    def __init__(self, case_number=None, add_handler=False, verbose=False):
+    def __init__(self, case_number=None, add_handler=False, verbose=False,
+                 desc="AWS_IR Action"):
         """Setup the stream logger for the object"""
         self.case_number = case_number
         self.logger = logging.getLogger('aws_ir.cli')
@@ -174,6 +176,9 @@ class Logger(object):
         else:
             self.logger.setLevel(logging.INFO)
 
+        self.log_file = "/tmp/{case_number}-aws_ir.log".format(
+                            case_number=self.case_number
+                        )
 
         if add_handler == True:
             streamhandler = logging.StreamHandler(sys.stdout)
@@ -182,11 +187,24 @@ class Logger(object):
             )
             streamhandler.setFormatter(streamFormatter)
             self.logger.addHandler(streamhandler)
+
+            fileHandler = logging.FileHandler(self.log_file, mode='a')
+            fileFormatter = logging.Formatter(
+                "\t{'timestamp': %(unixtime)s, 'message': '%(message)s', " +
+                "desc: '{desc}', 'datetime': '%(isotime)s'}},".format(desc=desc)
+            )
+            fileHandler.setFormatter(fileFormatter)
+            self.logger.addHandler(fileHandler)
         else:
             pass
             #There is already a stream handler
 
+    def __get_times(self):
+        tm = int(time.time())
+        dt = datetime.utcfromtimestamp(tm).isoformat()
+        times = {'unixtime': tm, 'isotime': dt}
+        return times
 
     def event_to_logs(self, message):
         """Use timesketch logger format to create custody chain"""
-        self.logger.info(message)
+        self.logger.info(message, extra=self.__get_times())
