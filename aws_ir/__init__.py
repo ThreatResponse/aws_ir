@@ -1,6 +1,8 @@
 __version__ = '0.2.1'
 
 import logging
+import time
+from datetime import datetime
 
 
 def set_stream_logger(name="aws_ir", level=logging.INFO,
@@ -31,7 +33,6 @@ def set_file_logger(case_number, name="aws_ir", level=logging.INFO,
                )
 
     logger = logging.getLogger(name)
-    logging.setLoggerClass(TimesketchLogger)
     logger.setLevel(level)
     fileHandler = logging.FileHandler(log_file, mode='a')
     fileHandler.setLevel(level)
@@ -45,11 +46,12 @@ def set_file_logger(case_number, name="aws_ir", level=logging.INFO,
 
 class TimesketchLogger(logging.getLoggerClass()):
 
-    def _log(self, level, msg, args, exc_info=None, extra=None):
-        if extra is None:
-            extra = self.__get_times()
-        super(TimesketchLogger, self)._log(level, msg, args, exc_info, extra)
+    def __init__(self, *args, **kwargs):
+        super(TimesketchLogger, self).__init__(*args, **kwargs)
 
+    def _log(self, level, msg, args, exc_info=None, extra=None):
+        super(TimesketchLogger, self)._log(level, msg, args, exc_info=exc_info,
+                                           extra=self.__get_times())
     def __get_times(self):
         tm = int(time.time())
         dt = datetime.utcfromtimestamp(tm).isoformat()
@@ -61,4 +63,5 @@ class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
+logging.setLoggerClass(TimesketchLogger)
 logging.getLogger('margaritashotgun').addHandler(NullHandler())
