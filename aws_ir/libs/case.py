@@ -13,6 +13,8 @@ from aws_ir.libs import connection
 from aws_ir.libs import aws
 from aws_ir.libs import inventory
 
+logger = logging.getLogger(__name__)
+
 
 class Case(object):
     """Takes case number and examiner cidr."""
@@ -42,7 +44,7 @@ class Case(object):
             service='ec2'
         ).connect()
 
-        self.case_logger.event_to_logs("Initial connection to AmazonWebServices made.")
+        logger.info("Initial connection to AmazonWebServices made.")
 
         self.amazon = aws.AmazonWebServices(
             connection.Connection(
@@ -53,22 +55,18 @@ class Case(object):
 
         self.available_regions = self.amazon.regions
 
-        self.case_logger.event_to_logs("Inventory AWS Regions Complete {region_count} found.".format(
-                region_count = len(self.amazon.regions)
-            )
-        )
+        logger.info(("Inventory AWS Regions Complete {region_count} "
+                     "found.".format(region_count = len(self.amazon.regions))))
 
         self.availability_zones = self.amazon.availability_zones
 
-        self.case_logger.event_to_logs(
-                "Inventory Availability Zones Complete {zone_count} found.".format(
-                zone_count = len(self.amazon.availability_zones)
-            )
-        )
+        logger.info(("Inventory Availability Zones Complete {zone_count} "
+                     "found.".format(
+                        zone_count = len(self.amazon.availability_zones)
+                     )))
 
-        self.case_logger.event_to_logs(
-                "Beginning inventory of resources world wide.  This might take a minute..."
-        )
+        logger.info(("Beginning inventory of resources world wide.  "
+                     "This might take a minute..."))
 
         self.aws_inventory = inventory.Inventory(
             connection.Connection(
@@ -78,9 +76,8 @@ class Case(object):
             self.available_regions
         )
 
-        self.case_logger.event_to_logs(
-                "Inventory complete.  Proceeding to resource identification."
-        )
+        logger.info(("Inventory complete.  Proceeding to resource "
+                     "identification."))
 
         self.inventory = self.aws_inventory.inventory
 
@@ -122,7 +119,7 @@ class Case(object):
             print(processing_end_messaging)
             sys.exit(0)
         except Exception as e:
-            self.case_logger.event_to_logs(
+            logger.error(
                 ("Error uploading case logs for {case_number} to s3 "
                  "bucket {case_bucket}: {ex}".format(case_number=self.case_number,
                                                      case_bucket=self.case_bucket,
@@ -205,7 +202,3 @@ class Logger(object):
             f.write(']')
             f.flush()
             f.close()
-
-    def event_to_logs(self, message):
-        """Use timesketch logger format to create custody chain"""
-        self.logger.info(message, extra=self.__get_times())

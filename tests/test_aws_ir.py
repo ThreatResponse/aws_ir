@@ -68,11 +68,6 @@ def aws_ir_object():
 def test_object_exists():
     assert aws_ir_object() is not None
 
-def test_event_to_logs():
-    a = aws_ir_object()
-    res = a.event_to_logs('This incident was full of hax')
-    assert res == True
-
 def test_setup_bucket():
     a = aws_ir_object()
     a.setup_bucket(region='us-west-2')

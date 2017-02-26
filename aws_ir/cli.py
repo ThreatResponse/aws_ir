@@ -144,8 +144,10 @@ class cli():
 
         aws_ir.set_stream_logger(level=log_level)
         aws_ir.set_file_logger(case_obj.case_number, level=log_level)
+        logger = logging.getLogger(__name__)
+
         case_logger = case.Logger(add_handler=True, case_number=case_obj.case_number, verbose=self.config.verbose)
-        case_logger.event_to_logs("Parsing successful proceeding to incident plan.")
+        logger.info("Initialization successful proceeding to incident plan.")
         compromise_object = None
         if self.config.func == 'host_compromise':
             hc = host.Compromise(

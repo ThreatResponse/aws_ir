@@ -1,4 +1,5 @@
 import os
+import logging
 
 from aws_ir.libs import volatile
 from aws_ir.libs import compromised
@@ -9,6 +10,8 @@ from aws_ir.plugins import tag_host
 from aws_ir.plugins import gather_host
 from aws_ir.plugins import snapshotdisks_host
 from aws_ir.plugins import stop_host
+
+logger = logging.getLogger(__name__)
 
 
 """Compromise class for Host Compromise"""
@@ -102,15 +105,14 @@ class Compromise(object):
 
         # step 5 - gather memory
         if compromised_resource['platform'] == 'windows':
-            self.logger.event_to_logs('Platform is Windows skipping live memory')
+            logger.info('Platform is Windows skipping live memory')
         else:
-            self.logger.event_to_logs(
-                "Attempting run margarita shotgun for {user} on {ip} with {keyfile}".format(
-                    user=self.user,
-                    ip=self.compromised_host_ip,
-                    keyfile=self.ssh_key_file_path
-                    )
-                )
+            logger.info(("Attempting run margarita shotgun for {user} on "
+                         "{ip} with {keyfile}".format(
+                             user=self.user,
+                             ip=self.compromised_host_ip,
+                             keyfile=self.ssh_key_file_path
+                         )))
             try:
                 volatile_data = volatile.Memory(
                     client=client,
@@ -127,7 +129,7 @@ class Compromise(object):
                       case_number=self.case.case_number
                  )
 
-                self.logger.event_to_logs(("memory capture completed for: {0}, "
+                logger.info(("memory capture completed for: {0}, "
                                     "failed for: {1}".format(results['completed'],
                                                              results['failed'])))
             except Exception as ex:
@@ -135,14 +137,8 @@ class Compromise(object):
                 if isinstance(ex, KeyboardInterrupt):
                     raise
                 else:
-                    self.logger.event_to_logs(
-                        (
-                            "Memory acquisition failure with exception"
-                              "{exception}. ".format(
-                                                exception=ex
-                            )
-                        )
-                    )
+                    logger.error(("Memory acquisition failure with exception"
+                                  "{exception}. ".format(exception=ex)))
 
         # step 6 - shutdown instance
         stop_host.Stop(
