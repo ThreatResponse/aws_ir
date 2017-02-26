@@ -7,7 +7,6 @@ import os
 
 from datetime import datetime, timedelta
 
-from aws_ir.libs import ts_logger
 from aws_ir.libs import s3bucket
 from aws_ir.libs import connection
 from aws_ir.libs import aws
@@ -190,9 +189,4 @@ class Logger(object):
 
     def event_to_logs(self, message):
         """Use timesketch logger format to create custody chain"""
-        try:
-            json_event = ts_logger.timesketch_logger(message, self.case_number)
-            self.logger.info(message)
-            return True
-        except:
-            return False
+        self.logger.info(message)
