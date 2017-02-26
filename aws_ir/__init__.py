@@ -1,5 +1,6 @@
 __version__ = '0.2.1'
 
+import os
 import logging
 import time
 from datetime import datetime
@@ -43,6 +44,24 @@ def set_file_logger(case_number, name="aws_ir", level=logging.INFO,
     fileHandler.setFormatter(fileFormatter)
     logger.addHandler(fileHandler)
 
+def wrap_log_file(case_number, base_dir="/tmp"):
+    """
+    """
+    log_file = "{base_dir}/{case_number}-aws_ir.log".format(
+                   base_dir=base_dir, case_number=case_number
+               )
+    # if log_file exists and is not empty  append a closing "]" to the file
+    if os.path.isfile(log_file) and (os.path.getsize(log_file) > 0):
+        with open(log_file, 'a') as f:
+            f.write("]")
+            f.flush()
+            f.close()
+    # otherwise write an opening "[" to the file
+    else:
+        with open(log_file, 'w+') as f:
+            f.write("[\n")
+            f.flush()
+            f.close()
 
 class TimesketchLogger(logging.getLoggerClass()):
 
