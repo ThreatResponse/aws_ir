@@ -173,14 +173,14 @@ class Logger(object):
             self.logger.setLevel(logging.DEBUG)
         else:
             self.logger.setLevel(logging.INFO)
-        streamhandler = logging.StreamHandler(sys.stdout)
 
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
 
         if add_handler == True:
-            streamhandler.setFormatter(formatter)
+            streamhandler = logging.StreamHandler(sys.stdout)
+            streamFormatter = logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
+            streamhandler.setFormatter(streamFormatter)
             self.logger.addHandler(streamhandler)
         else:
             pass
