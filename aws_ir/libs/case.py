@@ -101,7 +101,7 @@ class Case(object):
         except:
             return False
 
-    def copy_logs_to_s3(self, bucket):
+    def copy_logs_to_s3(self):
         """Convinience function to put all case logs to s3 at the end"""
         case_bucket = self.__get_case_bucket()
         logs = self.get_case_logs()
@@ -112,7 +112,7 @@ class Case(object):
         """ Any final post mitigation steps universal to all plans. """
         try:
             self.__rename_log_file(self.case_number, resource_id)
-            #self.copy_logs_to_s3()
+            self.copy_logs_to_s3()
             processing_end_messaging = (
                 """Processing complete for {case_number}"""
             ).format(case_number=self.case_number)
