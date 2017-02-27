@@ -17,14 +17,6 @@ class cli():
         self.config = None
         self.prog = sys.argv[0].split('/')[-1]
 
-    """Throw an error on missing modules"""
-    def module_missing(self, module_name):
-        try:
-            __import__(module_name)
-        except ImportError as e:
-            return True
-        else:
-            return False
 
     """Parent parser for top level flags"""
     def parse_args(self, args):
