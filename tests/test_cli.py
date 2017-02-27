@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import pytest
 import boto3
 import base64
