@@ -82,15 +82,15 @@ class cli():
         subparsers = parser.add_subparsers(dest="compromise-type")
         subparsers.required = True
 
-        host_compromise_parser = subparsers.add_parser(
-            'host-compromise', help=''
+        instance_compromise_parser = subparsers.add_parser(
+            'instance-compromise', help=''
         )
 
-        host_compromise_parser.add_argument(
+        instance_compromise_parser.add_argument(
             '--instance-ip',
             required=True,
             help='')
-        host_compromise_parser.add_argument(
+        instance_compromise_parser.add_argument(
             '--user',
             required=True,
             help="""
@@ -98,12 +98,12 @@ class cli():
                 for acquiring memory from the instance.
             """
         )
-        host_compromise_parser.add_argument(
+        instance_compromise_parser.add_argument(
             '--ssh-key',
             required=True,
             help='provide the path to the ssh private key for the user.'
         )
-        host_compromise_parser.set_defaults(func="host_compromise")
+        instance_compromise_parser.set_defaults(func="instance_compromise")
 
         key_compromise_parser = subparsers.add_parser(
             'key-compromise',
@@ -141,7 +141,7 @@ class cli():
         aws_ir.wrap_log_file(case_obj.case_number)
         logger.info("Initialization successful proceeding to incident plan.")
         compromise_object = None
-        if self.config.func == 'host_compromise':
+        if self.config.func == 'instance_compromise':
             hc = host.Compromise(
                 user = self.config.user,
                 ssh_key_file = self.config.ssh_key,
