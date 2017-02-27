@@ -5,8 +5,8 @@ import os
 import sys
 import copy
 
-sys.path.append(os.getcwd()+"/aws_ir")
-from ..aws_ir.libs import case
+sys.path.append(os.getcwd())
+from aws_ir.libs import case
 
 
 def test_object_init():

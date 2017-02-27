@@ -7,13 +7,13 @@ import os
 import sys
 import copy
 
-sys.path.append(os.getcwd()+"/aws_ir")
-from ..aws_ir import cli
+sys.path.append(os.getcwd())
+from aws_ir.cli import cli
 
 
 @pytest.fixture
 def cli_object():
-    cli_object = cli.cli()
+    cli_object = cli()
     return cli_object
 
 def test_parse_args():
