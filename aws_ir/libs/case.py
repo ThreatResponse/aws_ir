@@ -82,14 +82,16 @@ class Case(object):
         self.inventory = self.aws_inventory.inventory
 
 
-    def __rename_log_file(self, case_number, resource_id):
+    def __rename_log_file(self, case_number, resource_id, base_dir="/tmp"):
         """Move all log files to standard naming format"""
         try:
             os.rename(
-                ("/tmp/{case_number}-aws_ir.log").format(
+                ("{base_dir}/{case_number}-aws_ir.log").format(
+                    base_dir=base_dir,
                     case_number=case_number,
                     ),
-                ("/tmp/{case_number}-{resource_id}-aws_ir.log").format(
+                ("{base_dir}/{case_number}-{resource_id}-aws_ir.log").format(
+                    base_dir=base_dir,
                     case_number=case_number,
                     resource_id=resource_id
                     )
@@ -98,12 +100,13 @@ class Case(object):
         except:
             return False
 
-    def copy_logs_to_s3(self):
+    def copy_logs_to_s3(self, base_dir="/tmp"):
         """Convinience function to put all case logs to s3 at the end"""
         case_bucket = self.__get_case_bucket()
-        logs = self.get_case_logs()
+        logs = self.__get_case_logs(base_dir=base_dir)
         for log in logs:
-            case_bucket.upload_file(str("/tmp/" + log), log)
+            case_bucket.upload_file("{base_dir}/{log}".format(base_dir=base_dir,
+                                                              log=log), log)
 
     def teardown(self, region, resource_id):
         """ Any final post mitigation steps universal to all plans. """
@@ -127,10 +130,10 @@ class Case(object):
             sys.exit(1)
 
 
-    def get_case_logs(self):
+    def __get_case_logs(self, base_dir="/tmp"):
         """Enumerates all case logs based on case number from system /tmp"""
         files = []
-        for file in os.listdir("/tmp"):
+        for file in os.listdir(base_dir):
             if file.startswith(self.case_number):
                 files.append(file)
         return files
