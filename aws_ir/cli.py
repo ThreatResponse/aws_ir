@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import sys
 import argparse
+import logging
 
+import aws_ir
 from aws_ir import __version__
 from aws_ir.libs import case
 
@@ -15,14 +17,6 @@ class cli():
         self.config = None
         self.prog = sys.argv[0].split('/')[-1]
 
-    """Throw an error on missing modules"""
-    def module_missing(self, module_name):
-        try:
-            __import__(module_name)
-        except ImportError as e:
-            return True
-        else:
-            return False
 
     """Parent parser for top level flags"""
     def parse_args(self, args):
@@ -88,15 +82,15 @@ class cli():
         subparsers = parser.add_subparsers(dest="compromise-type")
         subparsers.required = True
 
-        host_compromise_parser = subparsers.add_parser(
-            'host-compromise', help=''
+        instance_compromise_parser = subparsers.add_parser(
+            'instance-compromise', help=''
         )
 
-        host_compromise_parser.add_argument(
+        instance_compromise_parser.add_argument(
             '--instance-ip',
             required=True,
             help='')
-        host_compromise_parser.add_argument(
+        instance_compromise_parser.add_argument(
             '--user',
             required=True,
             help="""
@@ -104,12 +98,12 @@ class cli():
                 for acquiring memory from the instance.
             """
         )
-        host_compromise_parser.add_argument(
+        instance_compromise_parser.add_argument(
             '--ssh-key',
             required=True,
             help='provide the path to the ssh private key for the user.'
         )
-        host_compromise_parser.set_defaults(func="host_compromise")
+        instance_compromise_parser.set_defaults(func="instance_compromise")
 
         key_compromise_parser = subparsers.add_parser(
             'key-compromise',
@@ -128,22 +122,32 @@ class cli():
     """Logic to decide on host or key compromise"""
     def run(self):
         self.config = self.parse_args(sys.argv[1:])
-        case_logger = case.Logger(add_handler=True, verbose=self.config.verbose)
-        case_logger.event_to_logs("Parsing successful proceeding to incident plan.")
+
+        case_obj = case.Case(
+            self.config.case_number,
+            self.config.examiner_cidr_range,
+            self.config.bucket_name
+        )
+
+        if self.config.verbose:
+            log_level = logging.DEBUG;
+        else:
+            log_level = logging.INFO
+
+        aws_ir.set_stream_logger(level=log_level)
+        aws_ir.set_file_logger(case_obj.case_number, level=log_level)
+        logger = logging.getLogger(__name__)
+
+        aws_ir.wrap_log_file(case_obj.case_number)
+        logger.info("Initialization successful proceeding to incident plan.")
         compromise_object = None
-        if self.config.func == 'host_compromise':
+        if self.config.func == 'instance_compromise':
             hc = host.Compromise(
                 user = self.config.user,
                 ssh_key_file = self.config.ssh_key,
                 compromised_host_ip = self.config.instance_ip,
                 prog = self.prog,
-                case = case.Case(
-                    self.config.case_number,
-                    self.config.examiner_cidr_range,
-                    self.config.bucket_name
-
-                ),
-                logger = case_logger
+                case = case_obj
             )
             compromise_object = hc
             try:
@@ -154,13 +158,7 @@ class cli():
             kc = key.Compromise(
                 self.config.examiner_cidr_range,
                 self.config.access_key_id,
-                case = case.Case(
-                    self.config.case_number,
-                    self.config.examiner_cidr_range,
-                    self.config.bucket_name
-
-                ),
-                logger = case_logger
+                case = case_obj
             )
 
             compromise_object = kc

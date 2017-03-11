@@ -1,9 +1,13 @@
+import logging
 
 from aws_ir.libs import connection
 from aws_ir.libs import compromised
 
 from aws_ir.plugins import disableaccess_key
 from aws_ir.plugins import revokests_key
+
+logger = logging.getLogger(__name__)
+
 
 """Compromise class for Key Compromise Procedure"""
 class Compromise(object):
@@ -12,8 +16,7 @@ class Compromise(object):
             examiner_cidr_range='0.0.0.0/0',
             compromised_access_key_id=None,
             region='us-west-2',
-            case=None,
-            logger=None
+            case=None
         ):
 
         if compromised_access_key_id==None:
@@ -25,7 +28,6 @@ class Compromise(object):
         self.compromised_access_key_id = compromised_access_key_id
         self.region = region
         self.case = case
-        self.logger = logger
 
 
     def mitigate(self):
@@ -46,9 +48,7 @@ class Compromise(object):
             region=compromised_resource['region']
         ).connect()
 
-        self.logger.event_to_logs(
-                "Attempting key disable."
-        )
+        logger.info("Attempting key disable.")
 
 
         # step 1 - disable access key
@@ -66,13 +66,9 @@ class Compromise(object):
             dry_run=False
         )
 
-        self.logger.event_to_logs(
-                "STS Tokens revoked issued prior to NOW."
-        )
+        logger.info("STS Tokens revoked issued prior to NOW.")
 
-        self.logger.event_to_logs(
-                "Disable complete.  Uploading results."
-        )
+        logger.info("Disable complete.  Uploading results.")
 
         self.case.teardown(
             region=self.region,

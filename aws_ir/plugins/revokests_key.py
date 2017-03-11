@@ -2,6 +2,7 @@ import datetime
 import boto3
 import os
 import fnmatch
+import aws_ir
 
 from jinja2 import Template
 
@@ -82,7 +83,7 @@ class RevokeSTS(object):
         )
         return response
 
-    def __locate_file(self, pattern, root=os.curdir):
+    def __locate_file(self, pattern, root=aws_ir.__path__[0]):
         '''Locate all files matching supplied filename pattern in and below
         supplied root directory.'''
         for path, dirs, files in os.walk(os.path.abspath(root)):

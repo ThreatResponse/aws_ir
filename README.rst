@@ -1,7 +1,7 @@
 AWS IR
 ======
 
-Python installable command line utility for mitigation of host and key compromises.
+Python installable command line utility for mitigation of instance and key compromises.
 
 Documentation
 -------------
@@ -36,15 +36,15 @@ Optional Arguments
    usage: aws_ir [-h] [--case-number CASE_NUMBER]
                  [--examiner-cidr-range EXAMINER_CIDR_RANGE]
                  [--bucket-name BUCKET_NAME] [--dry-run]
-                 {host-compromise,key-compromise} ...
+                 {instance-compromise,key-compromise} ...
    
    Incident Response command line for Amazon Web Services. This command line
-   interface is designed to process host and key based incursions without delay
+   interface is designed to process instance and key based incursions without delay
    or error.
    
    positional arguments:
-     {host-compromise,key-compromise}
-       host-compromise
+     {instance-compromise,key-compromise}
+       instance-compromise
        key-compromise
    
    optional arguments:
@@ -91,19 +91,19 @@ Below is the output of running the ``key-compromise`` subcommand.
    2016-07-29 16:53:54,839 - aws_ir.cli - INFO - Set satus of access key AKIAJGOVL2FIYOG6YFIA to Inactive
    Processing complete
 
-Host Compromise
-***************
+Instance Compromise
+*******************
 
-The ``aws_ir`` subcommand ``host-compromise`` preserves forensic artifacts from a compromised host after isolating the host.
+The ``aws_ir`` subcommand ``instance-compromise`` preserves forensic artifacts from a compromised instance after isolating the instance.
 Once all artifacts are collected and tagged the compromised instance is powered off.
-The ``host-compromise`` subcommand takes three arguments, the ``instance-ip`` of the compromised host, a ``user`` with ssh access to the target instance, and the ``ssh-key`` used for authentication.
+The ``instance-compromise`` subcommand takes three arguments, the ``instance-ip`` of the compromised instance, a ``user`` with ssh access to the target instance, and the ``ssh-key`` used for authentication.
 
 Currently ``user`` must be capable of passwordless sudo for memory capture to complete.  If ``user`` does not have passwordless sudo capabilities all artifiacts save for the memory capture will be gathered.
 
 .. code-block:: bash
 
-   $ aws_ir host-compromise -h
-   usage: aws_ir host-compromise [-h] --instance-ip INSTANCE_IP --user USER
+   $ aws_ir instance-compromise -h
+   usage: aws_ir instance-compromise [-h] --instance-ip INSTANCE_IP --user USER
                                  --ssh-key SSH_KEY
    
    optional arguments:
@@ -115,11 +115,11 @@ Currently ``user`` must be capable of passwordless sudo for memory capture to co
 
 AWS IR saves all forensic artifacts except for disk snapshots in an s3 bucket created for each case.  Disk snapshots are tagged with the same case number as the rest of the rest of the artifacts.
 
-Below is the output of running the ``host-compromise`` subcommand.
+Below is the output of running the ``instance-compromise`` subcommand.
 
 .. code-block:: bash
 
-   $ aws_ir host-compromise --instance-ip 52.42.254.41 --user ec2-user --ssh-key key.pem
+   $ aws_ir instance-compromise --instance-ip 52.42.254.41 --user ec2-user --ssh-key key.pem
    2016-07-28 16:02:17,104 - aws_ir.cli - INFO - Initial connection to AmazonWebServices made.
    2016-07-28 16:02:23,741 - aws_ir.cli - INFO - Inventory AWS Regions Complete 11 found.
    2016-07-28 16:02:23,742 - aws_ir.cli - INFO - Inventory Availability Zones Complete 27 found.

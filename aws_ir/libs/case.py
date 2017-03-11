@@ -3,15 +3,18 @@
 import random
 import logging
 import sys
+import time
 import os
 
 from datetime import datetime, timedelta
 
-from aws_ir.libs import ts_logger
+import aws_ir
 from aws_ir.libs import s3bucket
 from aws_ir.libs import connection
 from aws_ir.libs import aws
 from aws_ir.libs import inventory
+
+logger = logging.getLogger(__name__)
 
 
 class Case(object):
@@ -31,7 +34,6 @@ class Case(object):
         else:
             self.case_bucket = self.__setup_bucket(region='us-west-2')
 
-        self.case_logger = Logger(self.case_number)
         self.examiner_cidr_range = examiner_cidr_range
 
 
@@ -42,7 +44,7 @@ class Case(object):
             service='ec2'
         ).connect()
 
-        self.case_logger.event_to_logs("Initial connection to AmazonWebServices made.")
+        logger.info("Initial connection to AmazonWebServices made.")
 
         self.amazon = aws.AmazonWebServices(
             connection.Connection(
@@ -53,22 +55,18 @@ class Case(object):
 
         self.available_regions = self.amazon.regions
 
-        self.case_logger.event_to_logs("Inventory AWS Regions Complete {region_count} found.".format(
-                region_count = len(self.amazon.regions)
-            )
-        )
+        logger.info(("Inventory AWS Regions Complete {region_count} "
+                     "found.".format(region_count = len(self.amazon.regions))))
 
         self.availability_zones = self.amazon.availability_zones
 
-        self.case_logger.event_to_logs(
-                "Inventory Availability Zones Complete {zone_count} found.".format(
-                zone_count = len(self.amazon.availability_zones)
-            )
-        )
+        logger.info(("Inventory Availability Zones Complete {zone_count} "
+                     "found.".format(
+                        zone_count = len(self.amazon.availability_zones)
+                     )))
 
-        self.case_logger.event_to_logs(
-                "Beginning inventory of resources world wide.  This might take a minute..."
-        )
+        logger.info(("Beginning inventory of resources world wide.  "
+                     "This might take a minute..."))
 
         self.aws_inventory = inventory.Inventory(
             connection.Connection(
@@ -78,21 +76,22 @@ class Case(object):
             self.available_regions
         )
 
-        self.case_logger.event_to_logs(
-                "Inventory complete.  Proceeding to resource identification."
-        )
+        logger.info(("Inventory complete.  Proceeding to resource "
+                     "identification."))
 
         self.inventory = self.aws_inventory.inventory
 
 
-    def __rename_log_file(self, case_number, resource_id):
+    def __rename_log_file(self, case_number, resource_id, base_dir="/tmp"):
         """Move all log files to standard naming format"""
         try:
             os.rename(
-                ("/tmp/{case_number}-aws_ir.log").format(
+                ("{base_dir}/{case_number}-aws_ir.log").format(
+                    base_dir=base_dir,
                     case_number=case_number,
                     ),
-                ("/tmp/{case_number}-{resource_id}-aws_ir.log").format(
+                ("{base_dir}/{case_number}-{resource_id}-aws_ir.log").format(
+                    base_dir=base_dir,
                     case_number=case_number,
                     resource_id=resource_id
                     )
@@ -101,33 +100,40 @@ class Case(object):
         except:
             return False
 
-    def copy_logs_to_s3(self, bucket):
+    def copy_logs_to_s3(self, base_dir="/tmp"):
         """Convinience function to put all case logs to s3 at the end"""
-        s3 = boto3.resource('s3')
-        case_bucket = s3.Bucket(self.bucket)
-        logs = self.get_case_logs()
+        case_bucket = self.__get_case_bucket()
+        logs = self.__get_case_logs(base_dir=base_dir)
         for log in logs:
-            case_bucket.upload_file(str("/tmp/" + log), log)
+            case_bucket.upload_file("{base_dir}/{log}".format(base_dir=base_dir,
+                                                              log=log), log)
 
     def teardown(self, region, resource_id):
         """ Any final post mitigation steps universal to all plans. """
         try:
+            aws_ir.wrap_log_file(self.case_number)
             self.__rename_log_file(self.case_number, resource_id)
-            #self.copy_logs_to_s3()
+            self.copy_logs_to_s3()
             processing_end_messaging = (
-                """Processing complete for {case_number}"""
-            ).format(case_number=self.case_number)
+                """Processing complete for {case_number}\n"""
+                """Artifacts stored in s3://{case_bucket}"""
+            ).format(case_number=self.case_number,
+                     case_bucket=self.case_bucket)
             print(processing_end_messaging)
             sys.exit(0)
         except Exception as e:
-            sys.exit(0)
-            raise
+            logger.error(
+                ("Error uploading case logs for {case_number} to s3 "
+                 "bucket {case_bucket}: {ex}".format(case_number=self.case_number,
+                                                     case_bucket=self.case_bucket,
+                                                     ex=e)))
+            sys.exit(1)
 
 
-    def get_case_logs(self):
+    def __get_case_logs(self, base_dir="/tmp"):
         """Enumerates all case logs based on case number from system /tmp"""
         files = []
-        for file in os.listdir("/tmp"):
+        for file in os.listdir(base_dir):
             if file.startswith(self.case_number):
                 files.append(file)
         return files
@@ -143,43 +149,17 @@ class Case(object):
         return bucket_name
 
 
+    def __get_case_bucket(self):
+        client = connection.Connection(
+            type='resource',
+            service='s3'
+        ).connect()
+        return client.Bucket(self.case_bucket)
+
+
     def __generate_case_number(self):
         return datetime.utcnow().strftime(
             'cr-%y-%m%d%H-{0:04x}'
             ).format(
                 random.randint(0,2**16)
         )
-
-class Logger(object):
-    """Case logger class for wrapping output formatters."""
-    def __init__(self, case_number=None, add_handler=False, verbose=False):
-        """Setup the stream logger for the object"""
-        self.case_number = case_number
-        self.logger = logging.getLogger('aws_ir.cli')
-        self.verbose = verbose
-        if self.verbose:
-            self.logger.setLevel(logging.DEBUG)
-        else:
-            self.logger.setLevel(logging.INFO)
-        streamhandler = logging.StreamHandler(sys.stdout)
-
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
-
-        if add_handler == True:
-            streamhandler.setFormatter(formatter)
-            self.logger.addHandler(streamhandler)
-        else:
-            pass
-            #There is already a stream handler
-
-
-    def event_to_logs(self, message):
-        """Use timesketch logger format to create custody chain"""
-        try:
-            json_event = ts_logger.timesketch_logger(message, self.case_number)
-            self.logger.info(message)
-            return True
-        except:
-            return False
