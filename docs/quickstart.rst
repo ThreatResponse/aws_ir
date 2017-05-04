@@ -57,7 +57,7 @@ The ``instance-compromise`` subcommand takes three arguments, the ``instance-ip`
 
 .. code-block:: bash
 
-   $ aws_ir instance_compromise -h
+   $ aws_ir instance-compromise -h
    usage: aws_ir instance-compromise [-h] --instance-ip INSTANCE_IP --user USER
                                  --ssh-key SSH_KEY
    
@@ -74,7 +74,7 @@ Below is the output of running the ``instance-compromise`` subcommand.
 
 .. code-block:: bash
 
-   $ aws_ir instance_compromise --instance-ip 52.42.254.41 --user ec2-user --ssh-key key.pem
+   $ aws_ir instance-compromise --instance-ip 52.42.254.41 --user ec2-user --ssh-key key.pem
    2016-07-28 16:02:17,104 - aws_ir.cli - INFO - Initial connection to AmazonWebServices made.
    2016-07-28 16:02:23,741 - aws_ir.cli - INFO - Inventory AWS Regions Complete 11 found.
    2016-07-28 16:02:23,742 - aws_ir.cli - INFO - Inventory Availability Zones Complete 27 found.
@@ -102,6 +102,14 @@ Below is the output of running the ``instance-compromise`` subcommand.
    2016-07-28 16:05:19,454 - aws_ir.cli - INFO - Stopping instance: instance_id=i-ef048f40
    Processing complete
 
+Note that ``aws_ir instance-compromise`` installs `margarita shotgun <https://margaritashotgun.readthedocs.io/en/latest/>`__ on your local machine to perform memory capture. Doing so requires trusting the GPG key of security@threatresponse.cloud, which can be done with the command:
+
+.. code:: bash
+
+   $ curl -s https://threatresponse-lime-modules.s3.amazonaws.com/REPO_SIGNING_KEY.asc | gpg --import -
+   gpg: key 67172B17: public key "Lime Signing Key (Threat Response Official Lime Signing Key) <security@threatresponse.cloud>" imported
+   gpg: Total number processed: 1
+   gpg:               imported: 1  (RSA: 1)
 
 User Guide
 **********
