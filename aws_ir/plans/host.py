@@ -105,6 +105,10 @@ class Compromise(object):
         # step 5 - gather memory
         if compromised_resource['platform'] == 'windows':
             logger.info('Platform is Windows skipping live memory')
+        elif self.case.examiner_cidr_range is '0.0.0.0/0':
+            logger.info(
+                "Examing CIDR not provided skipping memory acquisition."
+            )
         else:
             logger.info(("Attempting run margarita shotgun for {user} on "
                          "{ip} with {keyfile}".format(
