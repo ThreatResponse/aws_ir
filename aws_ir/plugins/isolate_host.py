@@ -6,7 +6,7 @@ class Isolate(object):
         self,
         client,
         compromised_resource,
-        dry_run
+        dry_run=False
     ):
 
         self.client = client
@@ -23,7 +23,7 @@ class Isolate(object):
         self.__add_network_acl_entries(acl)
 
         """Conditions that can not be dry_run"""
-        if self.dry_run is not False:
+        if self.dry_run is False:
             self.__revoke_egress(sg)
             self.__add_security_group_to_instance(sg)
 
@@ -55,15 +55,18 @@ class Isolate(object):
         return security_group_result['GroupId']
 
     def __revoke_egress(self, group_id):
-        try:
-            self.client.revoke_security_group_egress(
-                DryRun=self.dry_run,
-                GroupId=group_id
-            )
-
-            return True
-        except:
-            return False
+        result = self.client.revoke_security_group_egress(
+            DryRun=self.dry_run,
+            GroupId=group_id,
+            IpPermissions=[
+                {
+                    'IpProtocol': '-1',
+                    'FromPort': -1,
+                    'ToPort': -1,
+                },
+            ]
+        )
+        print(result)
 
     def __generate_security_group_name(self):
         sg_name = "isolation-sg-{case_number}-{instance}-{uuid}".format(
@@ -112,9 +115,7 @@ class Isolate(object):
                 Protocol='-1',
                 RuleAction='deny',
                 Egress=True,
-                CidrBlock="{ip}/32".format(
-                    ip=self.compromised_resource['private_ip_address']
-                )
+                CidrBlock="0.0.0.0/0"
             )
             return True
         except Exception as e:
