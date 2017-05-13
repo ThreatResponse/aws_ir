@@ -10,6 +10,7 @@ from aws_ir.plugins import tag_host
 from aws_ir.plugins import gather_host
 from aws_ir.plugins import snapshotdisks_host
 from aws_ir.plugins import stop_host
+from aws_ir.plugins import examineracl_host
 
 logger = logging.getLogger(__name__)
 
@@ -110,12 +111,20 @@ class Compromise(object):
                 "Examing CIDR not provided skipping memory acquisition."
             )
         else:
+            logger.info("Adding examiner exception to isolated instance.")
+            examineracl_host.Plugin(
+                client=client,
+                compromised_resource=compromised_resource,
+                dry_run=False
+            )
+
             logger.info(("Attempting run margarita shotgun for {user} on "
                          "{ip} with {keyfile}".format(
                              user=self.user,
                              ip=self.compromised_host_ip,
                              keyfile=self.ssh_key_file_path
                          )))
+
             try:
                 volatile_data = volatile.Memory(
                     client=client,
