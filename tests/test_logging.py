@@ -1,11 +1,9 @@
-import aws_ir
-from aws_ir import TimesketchLogger
-
 import os
 import sys
-import logging
-
 sys.path.append(os.getcwd())
+import aws_ir
+from aws_ir import TimesketchLogger
+import logging
 
 CASE_NUMBER = "cr-17-000001-2d2d"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
