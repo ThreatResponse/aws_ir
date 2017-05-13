@@ -1,5 +1,5 @@
 import uuid
-import boto3
+
 
 class Isolate(object):
     def __init__(
@@ -20,18 +20,17 @@ class Isolate(object):
     def setup(self):
         sg = self.__create_isolation_security_group()
         acl = self.__create_network_acl()
-        connections_stopped = self.__add_network_acl_entries(acl)
+        self.__add_network_acl_entries(acl)
 
         """Conditions that can not be dry_run"""
-        if self.dry_run == False:
+        if self.dry_run is not False:
             self.__add_security_group_rule(sg)
-            egress_revoked = self.__revoke_egress(sg)
-            instance_shifted = self.__add_security_group_to_instance(sg)
-        pass
+            self.__revoke_egress(sg)
+            self.__add_security_group_to_instance(sg)
 
     def validate(self):
         """Validate that the instance is in fact isolated"""
-        if self.sg_name != None:
+        if self.sg_name is not None:
             return True
         else:
             return False
@@ -77,7 +76,7 @@ class Isolate(object):
 
     def __revoke_egress(self, group_id):
         try:
-            response = self.client.revoke_security_group_egress(
+            self.client.revoke_security_group_egress(
                 DryRun=self.dry_run,
                 GroupId=group_id
             )
@@ -97,7 +96,7 @@ class Isolate(object):
 
     def __add_security_group_to_instance(self, group_id):
         try:
-            response = self.client.modify_instance_attribute(
+            self.client.modify_instance_attribute(
                 DryRun=self.dry_run,
                 InstanceId=self.compromised_resource['instance_id'],
                 Groups=[
@@ -126,7 +125,7 @@ class Isolate(object):
 
     def __add_network_acl_entries(self, acl_id):
         try:
-            response = self.client.create_network_acl_entry(
+            self.client.create_network_acl_entry(
                 DryRun=self.dry_run,
                 NetworkAclId=acl_id,
                 RuleNumber=1300,
@@ -136,17 +135,18 @@ class Isolate(object):
                 CidrBlock=self.examiner_cidr_range
             )
 
-            response = self.client.create_network_acl_entry(
+            self.client.create_network_acl_entry(
                 DryRun=self.dry_run,
                 NetworkAclId=acl_id,
                 RuleNumber=1337,
                 Protocol='-1',
                 RuleAction='deny',
                 Egress=True,
-                CidrBlock="{compromised_host_private_ip}/32".format(
-                    compromised_host_private_ip=self.compromised_resource['private_ip_address']
+                CidrBlock="{ip}/32".format(
+                    ip=self.compromised_resource['private_ip_address']
                 )
             )
+
             return True
         except Exception as e:
             try:
