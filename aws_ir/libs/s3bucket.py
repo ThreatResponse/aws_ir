@@ -2,6 +2,8 @@ import boto3
 import uuid
 
 """Class to create the cases s3 bucket for asset storage"""
+
+
 class CaseBucket(object):
     def __init__(self, case_number, region):
         self.region = region
@@ -39,17 +41,17 @@ class CaseBucket(object):
                 except:
                     pass
 
-
     def __generate_name(self):
-        bucket_name = 'cloud-response-' + str(uuid.uuid4()).replace('-','')
+        bucket_name = 'cloud-response-' + str(uuid.uuid4()).replace('-', '')
         return bucket_name
 
     def __create_s3_bucket(self):
-        # the if statement is to prevent a fun little bug https://github.com/boto/boto3/issues/125
+        # the if statement is to prevent
+        # a fun little bug https://github.com/boto/boto3/issues/125
         if self.region == 'us-east-1':
-          bucket = self.s3.create_bucket(
-            Bucket=self.bucket_name
-          )
+            bucket = self.s3.create_bucket(
+                Bucket=self.bucket_name
+            )
         else:
             bucket = self.s3.create_bucket(
                 Bucket=self.bucket_name,
@@ -87,15 +89,15 @@ class CaseBucket(object):
     def __locate_bucket(self):
         buckets = self.s3.buckets.all()
         for bucket in buckets:
-          if bucket.name.startswith("cloud-response-"):
-              tags = self.__get_bucket_tags(bucket.name)
-              if self.__check_tags(tags):
-                  case_bucket = bucket
-                  return case_bucket
-              else:
-                  return None
-          else:
-              pass
+            if bucket.name.startswith("cloud-response-"):
+                tags = self.__get_bucket_tags(bucket.name)
+                if self.__check_tags(tags):
+                    case_bucket = bucket
+                    return case_bucket
+                else:
+                    return None
+            else:
+                pass
 
     def __get_bucket_tags(self, bucket):
         try:
@@ -112,6 +114,6 @@ class CaseBucket(object):
             return False
         for tag in tag_object['TagSet']:
             if tag['Value'] == self.case_number:
-               return True
+                return True
             else:
-               return False
+                return False

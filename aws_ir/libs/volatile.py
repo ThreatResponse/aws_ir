@@ -33,19 +33,31 @@ class Memory(object):
         password=None
     ):
         name = 'margaritashotgun'
-        config = dict(aws = dict(bucket = bucket),
-                      hosts = [ dict(addr = ip, port = port,
-                                    username = user,
-                                    password = password,
-                                    key = key) ],
-                      workers = 'auto',
-                      logging = { 'dir': '/tmp/',
-                                  'prefix':  ("{case_number}-{ip}").format(
+        config = dict(aws=dict(bucket=bucket),
+                      hosts=[dict(
+                                addr=ip, port=port,
+                                username=user,
+                                password=password,
+                                key=key
+                            )
+                        ],
+                      workers='auto',
+                      logging={
+                                'dir': '/tmp/',
+                                'prefix':  ("{case_number}-{ip}").format(
                                                 ip=ip,
-                                                case_number=case_number ) },
-                      repository = dict(enabled = True,
-                                        url = ('https://threatresponse-lime'
-                                               '-modules.s3.amazonaws.com/')))
-        capture_client = margaritashotgun.client(name=name, config=config,
-                                                 library=True, verbose=self.verbose)
+                                                case_number=case_number)
+                                },
+                      repository=dict(
+                                        enabled=True,
+                                        url=('https://threatresponse-lime'
+                                             '-modules.s3.amazonaws.com/')
+                                        )
+                      )
+        capture_client = margaritashotgun.client(
+                                                name=name,
+                                                config=config,
+                                                library=True,
+                                                verbose=self.verbose
+                        )
         return capture_client.run()

@@ -1,4 +1,6 @@
 import boto3
+
+
 class Connection(object):
     def __init__(self, type, service, region=None):
         self.region = region

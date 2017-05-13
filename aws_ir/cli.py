@@ -7,16 +7,18 @@ import aws_ir
 from aws_ir import __version__
 from aws_ir.libs import case
 
-#Support for multiple incident plans coming soon
+# Support for multiple incident plans coming soon
 from aws_ir.plans import key
 from aws_ir.plans import host
 
+
 """Basic arg parser for AWS_IR cli"""
+
+
 class cli():
     def __init__(self):
         self.config = None
         self.prog = sys.argv[0].split('/')[-1]
-
 
     """Parent parser for top level flags"""
     def parse_args(self, args):
@@ -45,8 +47,9 @@ class cli():
             '--case-number',
             default=None,
             help="""
-                The case number to use., usually of the form "cr-16-053018-2d2d"
-            """
+                The case number to use., usually of the form
+                "cr-16-053018-2d2d"
+                """
         )
 
         optional_args.add_argument(
@@ -118,7 +121,6 @@ class cli():
 
         return parser.parse_args(args)
 
-
     """Logic to decide on host or key compromise"""
     def run(self):
         self.config = self.parse_args(sys.argv[1:])
@@ -130,7 +132,7 @@ class cli():
         )
 
         if self.config.verbose:
-            log_level = logging.DEBUG;
+            log_level = logging.DEBUG
         else:
             log_level = logging.INFO
 
@@ -140,16 +142,16 @@ class cli():
 
         aws_ir.wrap_log_file(case_obj.case_number)
         logger.info("Initialization successful proceeding to incident plan.")
-        compromise_object = None
+
         if self.config.func == 'instance_compromise':
             hc = host.Compromise(
-                user = self.config.user,
-                ssh_key_file = self.config.ssh_key,
-                compromised_host_ip = self.config.instance_ip,
-                prog = self.prog,
-                case = case_obj
+                user=self.config.user,
+                ssh_key_file=self.config.ssh_key,
+                compromised_host_ip=self.config.instance_ip,
+                prog=self.prog,
+                case=case_obj
             )
-            compromise_object = hc
+
             try:
                 hc.mitigate()
             except KeyboardInterrupt:
@@ -158,17 +160,16 @@ class cli():
             kc = key.Compromise(
                 self.config.examiner_cidr_range,
                 self.config.access_key_id,
-                case = case_obj
+                case=case_obj
             )
 
-            compromise_object = kc
             try:
                 kc.mitigate()
             except KeyboardInterrupt:
                 pass
 
 
-if __name__=='__main__':
-   c = cli()
-   if c.prog is not None:
-       c.run()
+if __name__ == '__main__':
+    c = cli()
+    if c.prog is not None:
+        c.run()

@@ -1,5 +1,3 @@
-import boto3
-
 class Stop(object):
     def __init__(
         self,
@@ -15,7 +13,7 @@ class Stop(object):
         self.setup()
 
     def setup(self):
-        if self.dry_run != True:
+        if self.dry_run is not True:
             self.__stop_instance()
         else:
             pass

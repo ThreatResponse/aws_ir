@@ -1,13 +1,14 @@
-import boto3
-
 class AmazonWebServices(object):
+
     def __init__(self, client):
         self.client = client
         self.regions = self.__get_regions()
         self.availability_zones = self.__get_availability_zones()
 
     def __get_regions(self):
-        """ Use the provided AWS Client to iterate over the regions and store them """
+        """
+        Use the provided AWS Client to iterate over the regions and store them.
+        """
         availRegions = []
         regions = self.client.connect().describe_regions()
         for region in regions['Regions']:
@@ -15,7 +16,9 @@ class AmazonWebServices(object):
         return availRegions
 
     def __get_availability_zones(self):
-        """ Use the provided AWS Client to iterate over the azs and store them """
+        """
+        Use the provided AWS Client to iterate over the azs and store them
+        """
         availZones = []
         for region in self.regions:
             self.client.region = region
