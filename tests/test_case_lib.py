@@ -32,14 +32,14 @@ class TestCaseLib():
 
         # create test files
         klass.test_log = "{0}/{1}-aws_ir.log".format(
-                                                klass.log_base,
-                                                klass.generic_case.case_number
-                                            )
+            klass.log_base,
+            klass.generic_case.case_number
+        )
         klass.renamed_test_log = "{0}/{1}-{2}-aws_ir.log".format(
-                klass.log_base,
-                klass.generic_case.case_number,
-                'i-12345678'
-            )
+            klass.log_base,
+            klass.generic_case.case_number,
+            'i-12345678'
+        )
 
         with open(klass.test_log, 'w') as f:
             f.write('test log data')
@@ -48,8 +48,8 @@ class TestCaseLib():
         # create test screenshot
         klass.test_jpg = "{0}/{1}-console.jpg"\
             .format(
-                    klass.log_base,
-                    klass.generic_case.case_number
+                klass.log_base,
+                klass.generic_case.case_number
             )
         with open(klass.test_jpg, 'w') as f:
             f.write('test jpg data')
@@ -110,10 +110,10 @@ class TestCaseLib():
     def test_rename_log_file(self):
         # TODO: remove this test once we can test case.teardown
         result = self.generic_case._Case__rename_log_file(
-                self.generic_case.case_number,
-                'i-12345678',
-                base_dir=self.log_base
-            )
+            self.generic_case.case_number,
+            'i-12345678',
+            base_dir=self.log_base
+        )
 
         assert result is True
 

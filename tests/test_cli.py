@@ -27,14 +27,14 @@ def test_parse_args():
     user = "ec2-user"
     ssh_key = "ssh.key"
     instance_compromise_args = [
-                                "instance-compromise",
-                                "--instance-ip",
-                                instance_ip,
-                                "--user",
-                                user,
-                                "--ssh-key",
-                                ssh_key
-                            ]
+        "instance-compromise",
+        "--instance-ip",
+        instance_ip,
+        "--user",
+        user,
+        "--ssh-key",
+        ssh_key
+    ]
     access_key_id = "AKIAIOSFODNN7EXAMPLE"
     key_compromise_args = ["key-compromise", "--access-key-id",
                            access_key_id]

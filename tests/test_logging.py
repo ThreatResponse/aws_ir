@@ -29,8 +29,8 @@ class TestLogging():
 
         # setup file handler and ensure the object was created
         aws_ir.set_file_logger(
-                CASE_NUMBER, base_dir=BASE_DIR,
-                level=logging.INFO
+            CASE_NUMBER, base_dir=BASE_DIR,
+            level=logging.INFO
         )
         assert len(logger.handlers) == 3
         assert logger.handlers[2].__class__ == logging.FileHandler
