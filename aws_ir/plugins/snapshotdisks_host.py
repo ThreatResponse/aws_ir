@@ -1,5 +1,6 @@
 import boto3
 
+
 class Snapshotdisks(object):
     def __init__(
         self,
@@ -58,7 +59,7 @@ class Snapshotdisks(object):
             )
 
             snapshot = self.__create_snapshot(volume_id, description)
-            if snapshot != None:
+            if snapshot is not None:
                 snapshot_id = snapshot['SnapshotId']
                 self.__tag_snapshot(snapshot_id)
         pass

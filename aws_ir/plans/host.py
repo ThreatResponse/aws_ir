@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 """Compromise class for Host Compromise"""
+
+
 class Compromise(object):
     """ Procedures for responding to a HostCompromise.
         ** For now, assume only Linux system.
@@ -26,10 +28,9 @@ class Compromise(object):
             compromised_host_ip=None,
             prog=None,
             case=None
-        ):
+    ):
 
-
-        if compromised_host_ip==None:
+        if compromised_host_ip is None:
             raise ValueError(
                 'Must specifiy an IP for the compromised host'
             )
@@ -53,13 +54,15 @@ class Compromise(object):
 
         self.case.prep_aws_connections()
 
-        search = self.case.aws_inventory.locate_instance(self.compromised_host_ip)
+        search = self.case.aws_inventory.locate_instance(
+                self.compromised_host_ip
+        )
 
-        if search == None:
+        if search is None:
             raise ValueError('Compromised IP Address not found in inventory.')
 
         compromised_resource = compromised.CompromisedMetadata(
-            compromised_object_inventory = search,
+            compromised_object_inventory=search,
             case_number=self.case.case_number,
             type_of_compromise='host_compromise',
             examiner_cidr_range=self.case.examiner_cidr_range
@@ -71,33 +74,31 @@ class Compromise(object):
             region=compromised_resource['region']
         ).connect()
 
-
         # step 1 - isolate
         isolate_host.Isolate(
             client=client,
-            compromised_resource = compromised_resource,
+            compromised_resource=compromised_resource,
             dry_run=False
         )
 
         # step 2 - apply compromised tag
         tag_host.Tag(
             client=client,
-            compromised_resource = compromised_resource,
+            compromised_resource=compromised_resource,
             dry_run=False
         )
 
-        #step 3 - get instance metadata and store it
+        # step 3 - get instance metadata and store it
         gather_host.Gather(
             client=client,
-            compromised_resource = compromised_resource,
+            compromised_resource=compromised_resource,
             dry_run=False
         )
-
 
         # step 4 - create snapshot
         snapshotdisks_host.Snapshotdisks(
             client=client,
-            compromised_resource = compromised_resource,
+            compromised_resource=compromised_resource,
             dry_run=False
         )
 
@@ -114,7 +115,7 @@ class Compromise(object):
             try:
                 volatile_data = volatile.Memory(
                     client=client,
-                    compromised_resource = compromised_resource,
+                    compromised_resource=compromised_resource,
                     dry_run=False
                 )
 
@@ -126,9 +127,15 @@ class Compromise(object):
                       case_number=self.case.case_number
                  )
 
-                logger.info(("memory capture completed for: {0}, "
-                                    "failed for: {1}".format(results['completed'],
-                                                             results['failed'])))
+                logger.info(
+                        (
+                            "memory capture completed for: {0}, "
+                            "failed for: {1}".format(
+                                    results['completed'],
+                                    results['failed']
+                            )
+                        )
+                )
             except Exception as ex:
                 # raise keyboard interrupt passed during memory capture
                 if isinstance(ex, KeyboardInterrupt):
@@ -140,7 +147,7 @@ class Compromise(object):
         # step 6 - shutdown instance
         stop_host.Stop(
             client=client,
-            compromised_resource = compromised_resource,
+            compromised_resource=compromised_resource,
             dry_run=False
         )
 

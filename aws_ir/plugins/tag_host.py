@@ -1,6 +1,3 @@
-import uuid
-import boto3
-
 class Tag(object):
     def __init__(
         self,
@@ -55,9 +52,7 @@ class Tag(object):
         except Exception as e:
             if e.response['Error']['Message'] == """
                 Request would have succeeded, but DryRun flag is set.
-                """:
+            """:
                 return None
             else:
                 raise e
-
-

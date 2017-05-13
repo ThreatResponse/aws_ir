@@ -1,7 +1,7 @@
 import base64
-import boto3
 
 """Gathers ephemeral data that could be lost on instance termination"""
+
 
 class Gather(object):
     """
@@ -32,7 +32,7 @@ class Gather(object):
         self.setup()
 
     def setup(self):
-        if self.dry_run != True:
+        if self.dry_run is not True:
             metadata = self.__get_aws_instance_metadata()
             self.__log_aws_instance_metadata(metadata)
             console = self.__get_aws_instance_console_output()
@@ -55,20 +55,20 @@ class Gather(object):
                                     self.compromised_resource['instance_id']
                                 ]
                             }
-                        ]
+                            ]
                     )['Reservations']
 
         return metadata
 
     def __log_aws_instance_metadata(self, data):
-        if self.api == True:
+        if self.api is True:
             self.evidence['metadata.json'] = data
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-metadata.log").format(
                 case_number=self.compromised_resource['case_number'],
                 instance_id=self.compromised_resource['instance_id']
             )
-            with open(logfile,'w') as w:
+            with open(logfile, 'w') as w:
                 w.write(str(data))
 
     def __get_aws_instance_console_output(self):
@@ -78,14 +78,14 @@ class Gather(object):
         return output
 
     def __log_aws_instance_console_output(self, data):
-        if self.api == True:
+        if self.api is True:
             self.evidence['console.json'] = data
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-console.log").format(
                 case_number=self.compromised_resource['case_number'],
                 instance_id=self.compromised_resource['instance_id']
             )
-            with open(logfile,'w') as w:
+            with open(logfile, 'w') as w:
                 w.write(str(data))
 
     def __log_aws_instance_screenshot(self):
@@ -93,12 +93,13 @@ class Gather(object):
                InstanceId=self.compromised_resource['instance_id'],
                WakeUp=True
         )
-        if self.api == True:
+        if self.api is True:
             self.evidence['screenshot.jpg'] = response['ImageData']
         else:
-            logfile = ("/tmp/{case_number}-{instance_id}-screenshot.jpg").format(
-                case_number=self.compromised_resource['case_number'],
-                instance_id=self.compromised_resource['instance_id']
+            logfile = ("/tmp/{case_number}-{instance_id}-screenshot.jpg")\
+                .format(
+                    case_number=self.compromised_resource['case_number'],
+                    instance_id=self.compromised_resource['instance_id']
             )
 
             fh = open(logfile, "wb")

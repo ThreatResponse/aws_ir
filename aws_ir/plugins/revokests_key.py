@@ -1,10 +1,10 @@
 import datetime
-import boto3
 import os
 import fnmatch
 import aws_ir
 
 from jinja2 import Template
+
 
 class RevokeSTS(object):
     def __init__(
@@ -23,7 +23,7 @@ class RevokeSTS(object):
 
     def setup(self):
         """Method runs the plugin attaching policies to the user in question"""
-        if self.dry_run == False:
+        if self.dry_run is not False:
             username = self.__get_username_for_key()
             policy_document = self.__generate_inline_policy()
             self.__attach_inline_policy(username, policy_document)
