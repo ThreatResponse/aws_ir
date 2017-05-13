@@ -1,0 +1,11 @@
+language: python
+python:
+  - "3.6"
+before_install:
+  - "pip install flake8"
+  - "flake8 aws_ir"
+  - "flake8 tests"
+install:
+  - "pip install -r requirements.txt"
+  - "python setup.py build"
+  - "python setup.py install"
