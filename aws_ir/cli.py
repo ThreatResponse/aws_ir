@@ -2,6 +2,7 @@
 import sys
 import argparse
 import logging
+import os
 
 import aws_ir
 from aws_ir import __version__
@@ -11,6 +12,7 @@ from aws_ir.libs import case
 from aws_ir.plans import key
 from aws_ir.plans import host
 
+sys.path.append(os.getcwd())
 
 """Basic arg parser for AWS_IR cli"""
 
@@ -42,6 +44,14 @@ class cli():
             '--verbose',
             action='store_true',
             help='log debug messages')
+
+        optional_args.add_argument(
+            '--profile',
+            default='default',
+            help="""
+                A named boto profile to use instead of the default profile.
+                """
+        )
 
         optional_args.add_argument(
             '--case-number',
@@ -124,11 +134,11 @@ class cli():
     """Logic to decide on host or key compromise"""
     def run(self):
         self.config = self.parse_args(sys.argv[1:])
-
         case_obj = case.Case(
             self.config.case_number,
             self.config.examiner_cidr_range,
-            self.config.bucket_name
+            self.config.bucket_name,
+            self.config.profile
         )
 
         if self.config.verbose:

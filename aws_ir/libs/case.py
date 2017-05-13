@@ -18,10 +18,27 @@ logger = logging.getLogger(__name__)
 class Case(object):
     """Takes case number and examiner cidr."""
     def __init__(
-        self, case_number=None,
+        self,
+        case_number=None,
         examiner_cidr_range='0.0.0.0/0',
-        case_bucket=None
+        case_bucket=None,
+        profile=None
     ):
+        self.profile = profile
+
+        self.ec2_client = connection.Connection(
+            type='client',
+            service='ec2',
+            profile=self.profile
+        ).connect()
+
+        self.s3_resource = connection.Connection(
+            type='resource',
+            service='s3',
+            profile=self.profile
+        ).connect()
+
+
         if case_number:
             self.case_number = case_number
         else:
@@ -39,10 +56,7 @@ class Case(object):
         logger.info("Initial connection to AmazonWebServices made.")
 
         self.amazon = aws.AmazonWebServices(
-            connection.Connection(
-                type='client',
-                service='ec2'
-            )
+            self.ec2_client
         )
 
         self.available_regions = self.amazon.regions
@@ -61,10 +75,7 @@ class Case(object):
                      "This might take a minute..."))
 
         self.aws_inventory = inventory.Inventory(
-            connection.Connection(
-                type='client',
-                service='ec2'
-            ),
+            self.ec2_client,
             self.available_regions
         )
 
@@ -139,19 +150,22 @@ class Case(object):
 
     def __setup_bucket(self, region):
         """Wrap s3 find or create in object"""
+        client = connection.Connection(
+            type='client',
+            service='s3'
+        ).connect()
+
         bucket_name = s3bucket.CaseBucket(
                 self.case_number,
-                region
+                region,
+                client,
+                self.s3_resource
         ).bucket.name
 
         return bucket_name
 
     def __get_case_bucket(self):
-        client = connection.Connection(
-            type='resource',
-            service='s3'
-        ).connect()
-        return client.Bucket(self.case_bucket)
+        return self.s3_resource.Bucket(self.case_bucket)
 
     def __generate_case_number(self):
         return datetime.utcnow().strftime(
