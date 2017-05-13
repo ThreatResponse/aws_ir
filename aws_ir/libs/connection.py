@@ -11,7 +11,7 @@ class Connection(object):
 
     def connect(self):
         if self.connection_type is None:
-            raise StandardError(
+            raise AttributeError(
                 "Could not determine connect type.  Set client or resource."
             )
         elif self.connection_type == "client":
@@ -29,6 +29,6 @@ class Connection(object):
             self.resource = resource
             return self.resource
         else:
-            raise StandardError(
+            raise AttributeError(
                 "Connection type is not supported."
             )
