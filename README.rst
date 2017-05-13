@@ -88,7 +88,7 @@ Below is the output of running the ``key-compromise`` subcommand.
    2016-07-29 16:53:42,772 - aws_ir.cli - INFO - Inventory Availability Zones Complete 27 found.
    2016-07-29 16:53:42,773 - aws_ir.cli - INFO - Beginning inventory of instances world wide.  This might take a minute...
    2016-07-29 16:53:49,527 - aws_ir.cli - INFO - Inventory complete.  Proceeding to resource identification.
-   2016-07-29 16:53:54,839 - aws_ir.cli - INFO - Set satus of access key AKIAJGOVL2FIYOG6YFIA to Inactive
+   2016-07-29 16:53:54,839 - aws_ir.cli - INFO - Set status of access key AKIAJGOVL2FIYOG6YFIA to Inactive
    Processing complete
 
 Instance Compromise
