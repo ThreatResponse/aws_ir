@@ -6,7 +6,7 @@ progressbar-latest
 requests
 structlog
 pytz
-logutils=0.3.3
+logutils==0.3.3
 margaritashotgun>=0.4.0
 mock
 localstack
