@@ -1,11 +1,9 @@
-from aws_ir.cli import cli
-
-import pytest
 import os
 import sys
-import copy
-
 sys.path.append(os.getcwd())
+from aws_ir.cli import cli
+import pytest
+import copy
 
 
 @pytest.fixture
@@ -19,7 +17,10 @@ def test_parse_args():
     case_number = "cr-17-000001-2d2d"
     cidr_range = "0.0.0.0/0"
     bucket_name = "crn-00001-assets"
-    optional_args = ["--case-number", case_number,
+    profile = "default"
+
+    optional_args = ["--profile", profile,
+                     "--case-number", case_number,
                      "--examiner-cidr-range", cidr_range,
                      "--bucket-name", bucket_name, "--dry-run"]
     instance_ip = "172.16.20.1"

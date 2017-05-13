@@ -5,17 +5,11 @@ import uuid
 
 
 class CaseBucket(object):
-    def __init__(self, case_number, region):
+    def __init__(self, case_number, region, client, resource):
         self.region = region
         self.case_number = case_number
-        self.client = boto3.client(
-            's3',
-            region_name=region
-            )
-        self.session = boto3.Session(
-             region_name=region
-        )
-        self.s3 = self.session.resource('s3')
+        self.client = client
+        self.s3 = resource
         self.bucket = self.find_or_create_by()
 
     def find_or_create_by(self):
