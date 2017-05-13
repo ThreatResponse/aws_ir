@@ -38,7 +38,6 @@ class Case(object):
             profile=self.profile
         ).connect()
 
-
         if case_number:
             self.case_number = case_number
         else:
@@ -66,10 +65,12 @@ class Case(object):
 
         self.availability_zones = self.amazon.availability_zones
 
-        logger.info(("Inventory Availability Zones Complete {zone_count} "
-                     "found.".format(
-                        zone_count=len(self.amazon.availability_zones)
-                     )))
+        logger.info(
+            (
+                "Inventory Availability Zones Complete {zone_count}"
+                "found.".format(zone_count=len(self.amazon.availability_zones))
+            )
+        )
 
         logger.info(("Beginning inventory of resources world wide.  "
                      "This might take a minute..."))
@@ -91,12 +92,12 @@ class Case(object):
                 ("{base_dir}/{case_number}-aws_ir.log").format(
                     base_dir=base_dir,
                     case_number=case_number,
-                    ),
+                ),
                 ("{base_dir}/{case_number}-{resource_id}-aws_ir.log").format(
                     base_dir=base_dir,
                     case_number=case_number,
                     resource_id=resource_id
-                    )
+                )
             )
             return True
         except:
@@ -109,9 +110,9 @@ class Case(object):
         for log in logs:
             case_bucket.upload_file(
                 "{base_dir}/{log}".format(
-                                        base_dir=base_dir,
-                                        log=log
-                                    ),
+                    base_dir=base_dir,
+                    log=log
+                ),
                 log
             )
 
@@ -156,10 +157,10 @@ class Case(object):
         ).connect()
 
         bucket_name = s3bucket.CaseBucket(
-                self.case_number,
-                region,
-                client,
-                self.s3_resource
+            self.case_number,
+            region,
+            client,
+            self.s3_resource
         ).bucket.name
 
         return bucket_name
@@ -170,6 +171,6 @@ class Case(object):
     def __generate_case_number(self):
         return datetime.utcnow().strftime(
             'cr-%y-%m%d%H-{0:04x}'
-            ).format(
-                random.randint(0, 2**16)
+        ).format(
+            random.randint(0, 2**16)
         )
