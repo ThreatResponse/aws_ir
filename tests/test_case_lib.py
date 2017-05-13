@@ -16,9 +16,9 @@ class TestCaseLib():
         klass.created_buckets = []
         klass.s3_resource = boto3.resource('s3')
         klass.existing_bucket_name = "case-lib-test-{0}".format(
-                ''.join(random.choice(string.ascii_lowercase +
-                                      string.digits) for _ in range(10))
-                )
+            ''.join(random.choice(string.ascii_lowercase +
+                    string.digits) for _ in range(10))
+        )
 
         klass.s3_resource.Bucket(klass.existing_bucket_name).create()
         klass.created_buckets.append(klass.existing_bucket_name)
