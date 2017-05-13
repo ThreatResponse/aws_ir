@@ -1,18 +1,18 @@
+from aws_ir.cli import cli
+
 import pytest
-import boto3
-import base64
 import os
 import sys
 import copy
 
 sys.path.append(os.getcwd())
-from aws_ir.cli import cli
 
 
 @pytest.fixture
 def cli_object():
     cli_object = cli()
     return cli_object
+
 
 def test_parse_args():
     cli = cli_object()
@@ -25,8 +25,15 @@ def test_parse_args():
     instance_ip = "172.16.20.1"
     user = "ec2-user"
     ssh_key = "ssh.key"
-    instance_compromise_args = ["instance-compromise", "--instance-ip",
-                            instance_ip, "--user", user, "--ssh-key", ssh_key]
+    instance_compromise_args = [
+                                "instance-compromise",
+                                "--instance-ip",
+                                instance_ip,
+                                "--user",
+                                user,
+                                "--ssh-key",
+                                ssh_key
+                            ]
     access_key_id = "AKIAIOSFODNN7EXAMPLE"
     key_compromise_args = ["key-compromise", "--access-key-id",
                            access_key_id]
@@ -44,7 +51,7 @@ def test_parse_args():
     assert parsed_instance_args.case_number == case_number
     assert parsed_instance_args.examiner_cidr_range == cidr_range
     assert parsed_instance_args.bucket_name == bucket_name
-    assert parsed_instance_args.dry_run == True
+    assert parsed_instance_args.dry_run is True
     # Check instance-compromise required arguments
     assert parsed_instance_args.instance_ip == instance_ip
     assert parsed_instance_args.user == user
@@ -59,7 +66,7 @@ def test_parse_args():
     assert parsed_key_args.case_number == case_number
     assert parsed_key_args.examiner_cidr_range == cidr_range
     assert parsed_key_args.bucket_name == bucket_name
-    assert parsed_key_args.dry_run == True
+    assert parsed_key_args.dry_run is True
     # Check key compromise required arguments
     assert parsed_key_args.access_key_id == access_key_id
     # Check Instance Compromise required arguments are not present
