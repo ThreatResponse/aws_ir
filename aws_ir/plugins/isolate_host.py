@@ -24,7 +24,6 @@ class Isolate(object):
 
         """Conditions that can not be dry_run"""
         if self.dry_run is not False:
-            self.__add_security_group_rule(sg)
             self.__revoke_egress(sg)
             self.__add_security_group_to_instance(sg)
 
@@ -54,25 +53,6 @@ class Isolate(object):
             except:
                 raise e
         return security_group_result['GroupId']
-
-    def __add_security_group_rule(self, security_group_id):
-        try:
-            self.client.authorize_security_group_ingress(
-                DryRun=self.dry_run,
-                GroupId=security_group_id,
-                IpProtocol='tcp',
-                FromPort=22,
-                ToPort=22,
-                CidrIp=self.examiner_cidr_range
-            )
-        except Exception as e:
-            try:
-                if e.response['Error']['Message'] == """
-                Request would have succeeded, but DryRun flag is set.
-                """:
-                    pass
-            except:
-                raise e
 
     def __revoke_egress(self, group_id):
         try:
@@ -128,16 +108,6 @@ class Isolate(object):
             self.client.create_network_acl_entry(
                 DryRun=self.dry_run,
                 NetworkAclId=acl_id,
-                RuleNumber=1300,
-                Protocol='-1',
-                RuleAction='allow',
-                Egress=False,
-                CidrBlock=self.examiner_cidr_range
-            )
-
-            self.client.create_network_acl_entry(
-                DryRun=self.dry_run,
-                NetworkAclId=acl_id,
                 RuleNumber=1337,
                 Protocol='-1',
                 RuleAction='deny',
@@ -146,7 +116,6 @@ class Isolate(object):
                     ip=self.compromised_resource['private_ip_address']
                 )
             )
-
             return True
         except Exception as e:
             try:
