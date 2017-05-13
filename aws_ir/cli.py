@@ -2,7 +2,6 @@
 import sys
 import argparse
 import logging
-import os
 
 import aws_ir
 from aws_ir import __version__
@@ -11,8 +10,6 @@ from aws_ir.libs import case
 # Support for multiple incident plans coming soon
 from aws_ir.plans import key
 from aws_ir.plans import host
-
-sys.path.append(os.getcwd())
 
 """Basic arg parser for AWS_IR cli"""
 
