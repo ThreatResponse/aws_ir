@@ -48,15 +48,15 @@ class Gather(object):
 
     def __get_aws_instance_metadata(self):
         metadata = self.client.describe_instances(
-                         Filters=[
-                            {
-                                'Name': 'instance-id',
-                                'Values': [
-                                    self.compromised_resource['instance_id']
-                                ]
-                            }
-                            ]
-                    )['Reservations']
+            Filters=[
+                {
+                    'Name': 'instance-id',
+                    'Values': [
+                        self.compromised_resource['instance_id']
+                    ]
+                }
+            ]
+        )['Reservations']
 
         return metadata
 
@@ -90,8 +90,8 @@ class Gather(object):
 
     def __log_aws_instance_screenshot(self):
         response = self.client.get_console_screenshot(
-               InstanceId=self.compromised_resource['instance_id'],
-               WakeUp=True
+            InstanceId=self.compromised_resource['instance_id'],
+            WakeUp=True
         )
         if self.api is True:
             self.evidence['screenshot.jpg'] = response['ImageData']

@@ -24,8 +24,8 @@ class Query(object):
         client = self.client.connect()
 
         reservations = client.describe_instances(
-              Filters=[{'Name': 'instance-state-name', 'Values': ['running']}]
-              )['Reservations']
+            Filters=[{'Name': 'instance-state-name', 'Values': ['running']}]
+        )['Reservations']
 
         for reservation in reservations:
             for instance in reservation['Instances']:
@@ -72,8 +72,8 @@ class Query(object):
             volume_ids=[
                 bdm['Ebs']['VolumeId']
                 for bdm in instance.get(
-                        'BlockDeviceMappings', []
-                    )
+                    'BlockDeviceMappings', []
+                )
             ],
             region=region
         )
@@ -90,8 +90,8 @@ class Query(object):
             volume_ids=[
                 bdm['ebs']['volumeId']
                 for bdm in instance.get(
-                        'blockDeviceMappings', []
-                    )
+                    'blockDeviceMappings', []
+                )
             ],
             region=str(instance['placement']['availabilityZone'])[:-1]
         )

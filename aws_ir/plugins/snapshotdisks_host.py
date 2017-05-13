@@ -15,7 +15,7 @@ class Snapshotdisks(object):
         self.dry_run = dry_run
 
         self.session = boto3.Session(
-                    region_name=self.compromised_resource['region']
+            region_name=self.compromised_resource['region']
         )
 
         self.setup()

@@ -24,7 +24,7 @@ class Compromise(object):
 
         if compromised_access_key_id is None:
             raise ValueError(
-                    'Must specifiy an access_key_id for the compromised key.'
+                'Must specifiy an access_key_id for the compromised key.'
             )
 
         self.case_type = 'Key'

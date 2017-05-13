@@ -77,8 +77,8 @@ class CaseBucket(object):
             VersioningConfiguration=dict(
                 MFADelete='Disabled',
                 Status='Enabled'
-                )
             )
+        )
 
     def __locate_bucket(self):
         buckets = self.s3.buckets.all()

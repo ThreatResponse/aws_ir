@@ -30,8 +30,8 @@ def set_file_logger(case_number, name="aws_ir", level=logging.INFO,
     """
 
     log_file = "{base_dir}/{case_number}-aws_ir.log".format(
-                   base_dir=base_dir, case_number=case_number
-               )
+        base_dir=base_dir, case_number=case_number
+    )
 
     logger = logging.getLogger(name)
     logger.setLevel(level)
@@ -51,8 +51,8 @@ def wrap_log_file(case_number, base_dir="/tmp"):
     """
 
     log_file = "{base_dir}/{case_number}-aws_ir.log".format(
-                   base_dir=base_dir, case_number=case_number
-               )
+        base_dir=base_dir, case_number=case_number
+    )
     # if log_file exists and is not empty  append a closing "]" to the file
     if os.path.isfile(log_file) and (os.path.getsize(log_file) > 0):
         with open(log_file, 'a') as f:

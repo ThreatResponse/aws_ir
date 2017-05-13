@@ -38,7 +38,7 @@ class Compromise(object):
         if not os.path.exists(ssh_key_file):
             raise ValueError(
                 'Key file must exist. Could not find path {0}'.format(
-                        ssh_key_file
+                    ssh_key_file
                 )
             )
 
@@ -55,7 +55,7 @@ class Compromise(object):
         self.case.prep_aws_connections()
 
         search = self.case.aws_inventory.locate_instance(
-                self.compromised_host_ip
+            self.compromised_host_ip
         )
 
         if search is None:
@@ -120,21 +120,21 @@ class Compromise(object):
                 )
 
                 results = volatile_data.get_memory(
-                      bucket=self.case.case_bucket,
-                      ip=self.compromised_host_ip,
-                      user=self.user,
-                      key=self.ssh_key_file_path,
-                      case_number=self.case.case_number
-                 )
+                    bucket=self.case.case_bucket,
+                    ip=self.compromised_host_ip,
+                    user=self.user,
+                    key=self.ssh_key_file_path,
+                    case_number=self.case.case_number
+                )
 
                 logger.info(
-                        (
-                            "memory capture completed for: {0}, "
-                            "failed for: {1}".format(
-                                    results['completed'],
-                                    results['failed']
-                            )
+                    (
+                        "memory capture completed for: {0}, "
+                        "failed for: {1}".format(
+                            results['completed'],
+                            results['failed']
                         )
+                    )
                 )
             except Exception as ex:
                 # raise keyboard interrupt passed during memory capture

@@ -28,7 +28,7 @@ class Disableaccess(object):
         """Returns whether this plugin does what it claims to have done"""
         client = self.client
         response = client.get_access_key_last_used(
-                AccessKeyId=self.access_key_id
+            AccessKeyId=self.access_key_id
         )
 
         username = response['UserName']
@@ -57,7 +57,7 @@ class Disableaccess(object):
             # if the username is not provided, the key will not be found,
             # contrary to what the documentation says.
             response = client.get_access_key_last_used(
-                    AccessKeyId=self.access_key_id
+                AccessKeyId=self.access_key_id
             )
 
             username = response['UserName']
