@@ -1,7 +1,7 @@
 import uuid
 import boto3
 
-class Isolate(object):
+class Plugin(object):
     def __init__(
         self,
         client,

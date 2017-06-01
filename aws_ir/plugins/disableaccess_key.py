@@ -5,7 +5,7 @@ class DisableOwnKeyError(RuntimeError):
     """ Thrown when a request is made to disable the current key being used.  """
     pass
 
-class Disableaccess(object):
+class Plugin(object):
     def __init__(
         self,
         client,

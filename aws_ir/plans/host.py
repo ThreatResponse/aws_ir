@@ -73,21 +73,21 @@ class Compromise(object):
 
 
         # step 1 - isolate
-        isolate_host.Isolate(
+        isolate_host.Plugin(
             client=client,
             compromised_resource = compromised_resource,
             dry_run=False
         )
 
         # step 2 - apply compromised tag
-        tag_host.Tag(
+        tag_host.Plugin(
             client=client,
             compromised_resource = compromised_resource,
             dry_run=False
         )
 
         #step 3 - get instance metadata and store it
-        gather_host.Gather(
+        gather_host.Plugin(
             client=client,
             compromised_resource = compromised_resource,
             dry_run=False
@@ -95,7 +95,7 @@ class Compromise(object):
 
 
         # step 4 - create snapshot
-        snapshotdisks_host.Snapshotdisks(
+        snapshotdisks_host.Plugin(
             client=client,
             compromised_resource = compromised_resource,
             dry_run=False
@@ -138,7 +138,7 @@ class Compromise(object):
                                   "{exception}. ".format(exception=ex)))
 
         # step 6 - shutdown instance
-        stop_host.Stop(
+        stop_host.Plugin(
             client=client,
             compromised_resource = compromised_resource,
             dry_run=False

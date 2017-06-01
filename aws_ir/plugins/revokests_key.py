@@ -6,7 +6,7 @@ import aws_ir
 
 from jinja2 import Template
 
-class RevokeSTS(object):
+class Plugin(object):
     def __init__(
         self,
         client,

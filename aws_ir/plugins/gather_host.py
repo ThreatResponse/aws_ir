@@ -3,7 +3,7 @@ import boto3
 
 """Gathers ephemeral data that could be lost on instance termination"""
 
-class Gather(object):
+class Plugin(object):
     """
         Initializer takes standard plugin constructor
         added api flag for data persistence in AWS_IR

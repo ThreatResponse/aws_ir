@@ -1,6 +1,6 @@
 import boto3
 
-class Stop(object):
+class Plugin(object):
     def __init__(
         self,
         client,

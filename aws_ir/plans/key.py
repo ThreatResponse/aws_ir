@@ -52,7 +52,7 @@ class Compromise(object):
 
 
         # step 1 - disable access key
-        disableaccess_key.Disableaccess(
+        disableaccess_key.Plugin(
             client=client,
             compromised_resource = compromised_resource,
             dry_run=False
@@ -60,7 +60,7 @@ class Compromise(object):
 
 
         # step 2 - revoke and STS tokens issued prior to now
-        revokests_key.RevokeSTS(
+        revokests_key.Plugin(
             client=client,
             compromised_resource = compromised_resource,
             dry_run=False
