@@ -10,7 +10,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE = "{0}/{1}-aws_ir.log".format(BASE_DIR, CASE_NUMBER)
 
 
-class TestLogging():
+class TestLogging(object):
 
     def test_logging(self):
         logger = logging.getLogger('aws_ir')
@@ -56,8 +56,5 @@ class TestLogging():
                 logger.removeHandler(handler)
 
         # cleanup the log file if it was created
-        try:
-            if os.path.isfile(LOG_FILE):
-                os.remove(LOG_FILE)
-        except:
-            pass
+        if os.path.isfile(LOG_FILE):
+            os.remove(LOG_FILE)

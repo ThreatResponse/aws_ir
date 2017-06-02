@@ -1,9 +1,10 @@
+import copy
 import os
+import pytest
 import sys
+
 sys.path.append(os.getcwd())
 from aws_ir.cli import cli
-import pytest
-import copy
 
 
 @pytest.fixture
