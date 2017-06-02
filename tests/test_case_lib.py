@@ -1,4 +1,6 @@
 import pytest
+from moto import mock_s3, mock_ec2
+
 import boto3
 import os
 import sys
@@ -10,12 +12,23 @@ from aws_ir.libs import case
 
 
 class TestCaseLib():
-
     @classmethod
     def setup_class(klass):
         # setup bucket to test providing an s3 bucket to Case class
+        klass.m = mock_s3()
+
+        klass.m.start()
+
+        klass.e = mock_ec2()
+        klass.e.start()
+
         klass.created_buckets = []
-        klass.s3_resource = boto3.resource('s3')
+        klass.s3_resource = boto3.resource(
+             service_name='s3',
+             region_name='us-west-2'
+             #endpoint_url='http://localhost:5000',
+        )
+
         klass.existing_bucket_name = "case-lib-test-{0}".format(
                 ''.join(random.choice(string.ascii_lowercase +
                                       string.digits) for _ in range(10))
@@ -93,7 +106,6 @@ class TestCaseLib():
         assert case_with_cidr.case_bucket is not None
         assert case_with_cidr.examiner_cidr_range == '8.8.8.8/32'
 
-
     def test_prep_aws_connections(self):
         self.generic_case.prep_aws_connections()
 
@@ -114,19 +126,22 @@ class TestCaseLib():
         assert result is True
 
     def test_copy_logs_to_s3(self):
+        # pass
         self.generic_case.copy_logs_to_s3(base_dir=self.log_base)
 
         uploaded_files = []
         case_bucket = self.s3_resource.Bucket(self.generic_case.case_bucket)
         for obj in case_bucket.objects.all():
-            uploaded_files.append(obj.key)
+          uploaded_files.append(obj.key)
 
         test_log_key = self.renamed_test_log.split("/")[-1]
         test_jpg_key = self.test_jpg.split("/")[-1]
         assert test_log_key in uploaded_files
         assert test_jpg_key in uploaded_files
 
+
     @classmethod
+
     def teardown_class(klass):
         for bucket_name in klass.created_buckets:
             #cleanup all objects in created buckets
