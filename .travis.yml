@@ -7,7 +7,6 @@ before_install:
   - "flake8 tests"
 install:
   - "pip install -r requirements.txt"
+  - "pytest tests/"
   - "python setup.py build"
   - "python setup.py install"
-script:
-  - "pytest tests/test_cli.py"
