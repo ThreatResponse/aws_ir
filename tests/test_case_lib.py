@@ -113,15 +113,6 @@ class TestCaseLib():
         assert case_with_cidr.case_bucket is not None
         assert case_with_cidr.examiner_cidr_range == '8.8.8.8/32'
 
-    def test_prep_aws_connections(self):
-        self.generic_case.prep_aws_connections()
-
-        assert self.generic_case.amazon is not None
-        assert self.generic_case.available_regions is not None
-        assert self.generic_case.availability_zones is not None
-        assert self.generic_case.aws_inventory is not None
-        assert self.generic_case.inventory is not None
-
     def test_rename_log_file(self):
         # remove this test once we can test case.teardown
         result = self.generic_case._Case__rename_log_file(
