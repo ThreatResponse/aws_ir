@@ -37,7 +37,7 @@ class Connection(object):
         elif self.connection_type == "session":
             session = boto3.Session(
                 region_name=self.region,
-                profile_name = self.profile
+                profile_name=self.profile
             )
             return session
         else:
