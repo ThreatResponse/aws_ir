@@ -2,7 +2,7 @@ import boto3
 
 
 class Connection(object):
-    def __init__(self, type, service, region=None, profile=None):
+    def __init__(self, type, service, region='us-west-2', profile='default'):
         self.region = region
         self.connection_type = type
         self.service = service
@@ -11,6 +11,7 @@ class Connection(object):
         self.profile = profile
         try:
             boto3.setup_default_session(profile_name=self.profile)
+            boto3.set_stream_logger(name='boto3', level=10, format_string=None)
         except Exception as e:
             raise(e)
 
@@ -35,7 +36,8 @@ class Connection(object):
             return self.resource
         elif self.connection_type == "session":
             session = boto3.Session(
-                region_name=self.region
+                region_name=self.region,
+                profile_name = self.profile
             )
             return session
         else:

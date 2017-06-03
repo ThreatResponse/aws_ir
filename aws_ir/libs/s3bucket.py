@@ -106,8 +106,11 @@ class CaseBucket(object):
     def __check_tags(self, tag_object):
         if tag_object is None:
             return False
-        for tag in tag_object['TagSet']:
-            if tag['Value'] == self.case_number:
-                return True
-            else:
-                return False
+        elif tag_object.get('TagSet', None) is not None:
+            for tag in tag_object['TagSet']:
+                if tag['Value'] == self.case_number:
+                    return True
+                else:
+                    return False
+        else:
+            return False
