@@ -136,26 +136,3 @@ class TestCaseLib():
         test_jpg_key = self.test_jpg.split("/")[-1]
         assert test_log_key in uploaded_files
         assert test_jpg_key in uploaded_files
-
-    @classmethod
-    def teardown_class(klass):
-        for bucket_name in klass.created_buckets:
-            # cleanup all objects in created buckets
-
-            bucket = klass.s3_resource.Bucket(bucket_name)
-            for obj in bucket.objects.all():
-                obj.delete()
-            for ver_obj in bucket.object_versions.all():
-                ver_obj.delete()
-
-            # cleanup bucket
-            print("deleting bucket: {0}".format(bucket_name))
-            bucket.delete()
-
-        # cleanup files
-        if os.path.isfile(klass.test_log):
-            os.remove(klass.test_log)
-        if os.path.isfile(klass.renamed_test_log):
-            os.remove(klass.renamed_test_log)
-        if os.path.isfile(klass.test_jpg):
-            os.remove(klass.test_jpg)
