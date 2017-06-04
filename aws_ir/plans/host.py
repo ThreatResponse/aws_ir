@@ -77,22 +77,22 @@ class Compromise(object):
             region=compromised_resource['region']
         ).connect()
 
-        # step 1 - isolate
+        # step 1 - get instance metadata and store it
+        gather_host.Plugin(
+            client=client,
+            compromised_resource=compromised_resource,
+            dry_run=False
+        )
+
+        # step 2 - isolate
         isolate_host.Plugin(
             client=client,
             compromised_resource=compromised_resource,
             dry_run=False
         )
 
-        # step 2 - apply compromised tag
+        # step 3 - apply compromised tag
         tag_host.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
-
-        # step 3 - get instance metadata and store it
-        gather_host.Plugin(
             client=client,
             compromised_resource=compromised_resource,
             dry_run=False
