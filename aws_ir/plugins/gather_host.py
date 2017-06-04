@@ -3,11 +3,10 @@ import base64
 """Gathers ephemeral data that could be lost on instance termination"""
 
 
-class Gather(object):
-    """
-        Initializer takes standard plugin constructor
-        added api flag for data persistence in AWS_IR
-        api
+class Plugin(object):
+    """Initializer takes standard plugin constructor
+
+     added api flag for data persistence in AWS_IR api
     """
     def __init__(
         self,
@@ -43,7 +42,7 @@ class Gather(object):
             return False
 
     def validate(self):
-        """ Can't really validate data gather """
+        """Can't really validate data gather."""
         return True
 
     def __get_aws_instance_metadata(self):

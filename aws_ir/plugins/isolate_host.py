@@ -1,7 +1,9 @@
-import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-class Isolate(object):
+class Plugin(object):
     def __init__(
         self,
         client,
@@ -19,8 +21,10 @@ class Isolate(object):
 
     def setup(self):
         sg = self.__create_isolation_security_group()
-        acl = self.__create_network_acl()
-        self.__add_network_acl_entries(acl)
+        if self.exists is not True:
+            acl = self.__create_network_acl()
+            self.__add_network_acl_entries(acl)
+            self.__add_security_group_to_instance(sg)
 
         """Conditions that can not be dry_run"""
         if self.dry_run is False:
@@ -44,14 +48,17 @@ class Isolate(object):
 
             )
 
-        except Exception as e:
-            try:
-                if e.response['Error']['Message'] == """
-                Request would have succeeded, but DryRun flag is set.
-                """:
-                    security_group_result['GroupId'] = None
-            except:
-                logger.info("Security group already exists. Attaching existing SG.")
+            self.exists = False
+
+        except Exception:
+            logger.info("Security group already exists. Attaching existing SG.")
+            self.exists = True
+            security_group_result = self.client.describe_security_groups(
+                DryRun=self.dry_run,
+                GroupNames=[
+                    self.__generate_security_group_name()
+                ]
+            )['SecurityGroups'][0]
         return security_group_result['GroupId']
 
     def __revoke_egress(self, group_id):
@@ -66,7 +73,7 @@ class Isolate(object):
                 },
             ]
         )
-        print(result)
+        return result
 
     def __generate_security_group_name(self):
         sg_name = "isolation-sg-{case_number}-{instance}".format(
@@ -86,7 +93,7 @@ class Isolate(object):
                 ],
             )
             return True
-        except:
+        except Exception:
             return False
 
     def __create_network_acl(self):
@@ -102,7 +109,7 @@ class Isolate(object):
                 Request would have succeeded, but DryRun flag is set.
                 """:
                     return None
-            except:
+            except Exception as e:
                 raise e
 
     def __add_network_acl_entries(self, acl_id):
@@ -123,5 +130,5 @@ class Isolate(object):
                 Request would have succeeded, but DryRun flag is set.
                 """:
                     return None
-            except:
+            except Exception as e:
                 raise e

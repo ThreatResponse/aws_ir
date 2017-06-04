@@ -1,9 +1,9 @@
 class DisableOwnKeyError(RuntimeError):
-    """ Thrown when a request is made to disable the current key being used."""
+    """Thrown when a request is made to disable the current key being used."""
     pass
 
 
-class Disableaccess(object):
+class Plugin(object):
     def __init__(
         self,
         client,
@@ -46,7 +46,10 @@ class Disableaccess(object):
 
     def __disable_access_key(self, force_disable_self=False):
         """This function first checks to see if the key is already disabled\
-        if not then it goes to disabling"""
+
+        if not then it goes to disabling
+        """
+
         client = self.client
         # First check to see if the key is already disabled.
         if self.validate is True:

@@ -1,12 +1,12 @@
-import datetime
-import os
-import fnmatch
 import aws_ir
+import datetime
+import fnmatch
+import os
 
 from jinja2 import Template
 
 
-class RevokeSTS(object):
+class Plugin(object):
     def __init__(
         self,
         client,
@@ -84,8 +84,10 @@ class RevokeSTS(object):
         return response
 
     def __locate_file(self, pattern, root=aws_ir.__path__[0]):
-        '''Locate all files matching supplied filename pattern in and below
-        supplied root directory.'''
+        """Locate all files matching supplied filename pattern in and below
+
+        supplied root directory.
+        """
         for path, dirs, files in os.walk(os.path.abspath(root)):
             for filename in fnmatch.filter(files, pattern):
                 return os.path.join(path, filename)

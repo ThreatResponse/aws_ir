@@ -10,7 +10,6 @@ class Query(object):
         self.type = inventory_type
         self.result = self.get_all_running_from_aws()
 
-
     def get_running_by_region_aws(self, region):
         inventory = []
         self.client.region = region
@@ -26,7 +25,6 @@ class Query(object):
                 instance_data['region'] = region
                 inventory.append(instance_data)
         return inventory
-
 
     def __extract_data_aws(self, instance, region):
         return dict(
@@ -45,7 +43,6 @@ class Query(object):
             ],
             region=region
         )
-
 
     def get_all_running_from_aws(self):
         inventory = {}

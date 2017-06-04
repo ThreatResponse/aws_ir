@@ -1,15 +1,14 @@
 __version__ = '0.2.2'
 
-import os
-import logging
-import time
 from datetime import datetime
+
+import logging
+import os
+import time
 
 
 def set_stream_logger(name="aws_ir", level=logging.INFO,
                       format_string=None):
-    """
-    """
 
     if format_string is None:
         format_string = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -26,9 +25,6 @@ def set_stream_logger(name="aws_ir", level=logging.INFO,
 
 def set_file_logger(case_number, name="aws_ir", level=logging.INFO,
                     base_dir="/tmp", desc="AWS_IR Action"):
-    """
-    """
-
     log_file = "{base_dir}/{case_number}-aws_ir.log".format(
         base_dir=base_dir, case_number=case_number
     )
@@ -46,10 +42,6 @@ def set_file_logger(case_number, name="aws_ir", level=logging.INFO,
 
 
 def wrap_log_file(case_number, base_dir="/tmp"):
-
-    """
-    """
-
     log_file = "{base_dir}/{case_number}-aws_ir.log".format(
         base_dir=base_dir, case_number=case_number
     )

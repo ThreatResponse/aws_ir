@@ -1,4 +1,4 @@
-class Tag(object):
+class Plugin(object):
     def __init__(
         self,
         client,

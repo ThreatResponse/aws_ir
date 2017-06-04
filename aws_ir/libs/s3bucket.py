@@ -31,7 +31,7 @@ class CaseBucket(object):
                 try:
                     self.client.delete_bucket(Bucket=bucket['Name'])
                     print(bucket['Name'])
-                except:
+                except Exception:
                     pass
 
     def __generate_name(self):
@@ -98,7 +98,7 @@ class CaseBucket(object):
             response = s3.get_bucket_tagging(
                 Bucket=bucket,
             )
-        except:
+        except Exception:
             response = None
         return response
 

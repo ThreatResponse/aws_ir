@@ -1,16 +1,17 @@
-import os
 import logging
+import os
 
-from aws_ir.libs import volatile
 from aws_ir.libs import compromised
 from aws_ir.libs import connection
+from aws_ir.libs import volatile
 
-from aws_ir.plugins import isolate_host
-from aws_ir.plugins import tag_host
+from aws_ir.plugins import examineracl_host
 from aws_ir.plugins import gather_host
+from aws_ir.plugins import isolate_host
 from aws_ir.plugins import snapshotdisks_host
 from aws_ir.plugins import stop_host
-from aws_ir.plugins import examineracl_host
+from aws_ir.plugins import tag_host
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 class Compromise(object):
-    """ Procedures for responding to a HostCompromise.
-        ** For now, assume only Linux system.
+    """Procedures for responding to a HostCompromise.
+
+    ** For now, assume only Linux system.
     """
     def __init__(
             self,
@@ -76,28 +78,28 @@ class Compromise(object):
         ).connect()
 
         # step 1 - isolate
-        isolate_host.Isolate(
+        isolate_host.Plugin(
             client=client,
             compromised_resource=compromised_resource,
             dry_run=False
         )
 
         # step 2 - apply compromised tag
-        tag_host.Tag(
+        tag_host.Plugin(
             client=client,
             compromised_resource=compromised_resource,
             dry_run=False
         )
 
         # step 3 - get instance metadata and store it
-        gather_host.Gather(
+        gather_host.Plugin(
             client=client,
             compromised_resource=compromised_resource,
             dry_run=False
         )
 
         # step 4 - create snapshot
-        snapshotdisks_host.Snapshotdisks(
+        snapshotdisks_host.Plugin(
             client=client,
             compromised_resource=compromised_resource,
             dry_run=False
@@ -158,11 +160,11 @@ class Compromise(object):
                                   "{exception}. ".format(exception=ex)))
 
         # step 6 - shutdown instance
-       # stop_host.Stop(
-       #     client=client,
-       #     compromised_resource=compromised_resource,
-       #     dry_run=False
-       # )
+        stop_host.Plugin(
+            client=client,
+            compromised_resource=compromised_resource,
+            dry_run=False
+        )
 
         self.case.teardown(
             region=compromised_resource['region'],

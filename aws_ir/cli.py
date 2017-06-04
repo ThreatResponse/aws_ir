@@ -1,15 +1,17 @@
 #!/usr/bin/env python
-import sys
 import argparse
 import logging
+import sys
+
 
 import aws_ir
 from aws_ir import __version__
 from aws_ir.libs import case
 
 # Support for multiple incident plans coming soon
-from aws_ir.plans import key
 from aws_ir.plans import host
+from aws_ir.plans import key
+
 
 """Basic arg parser for AWS_IR cli"""
 

@@ -1,16 +1,17 @@
 """Case management operations for AWS_IR."""
-
-import random
 import logging
-import sys
 import os
+import random
+import sys
+
 from datetime import datetime
 
 import aws_ir
-from aws_ir.libs import s3bucket
-from aws_ir.libs import connection
 from aws_ir.libs import aws
+from aws_ir.libs import connection
 from aws_ir.libs import inventory
+from aws_ir.libs import s3bucket
+
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ class Case(object):
         self.examiner_cidr_range = examiner_cidr_range
 
     def prep_aws_connections(self):
-        """ Get all the required information before doing the mitigation. """
+        """Get all the required information before doing the mitigation. """
         logger.info("Initial connection to AmazonWebServices made.")
 
         self.amazon = aws.AmazonWebServices(
@@ -102,7 +103,7 @@ class Case(object):
                 )
             )
             return True
-        except:
+        except Exception:
             return False
 
     def copy_logs_to_s3(self, base_dir="/tmp"):
@@ -119,7 +120,7 @@ class Case(object):
             )
 
     def teardown(self, region, resource_id):
-        """ Any final post mitigation steps universal to all plans. """
+        """Any final post mitigation steps universal to all plans. """
         try:
             aws_ir.wrap_log_file(self.case_number)
             self.__rename_log_file(self.case_number, resource_id)
@@ -168,11 +169,11 @@ class Case(object):
         return bucket_name
 
     def __get_case_bucket(self):
-        return self.s3_resource.Bucket(self.case_bucket)
+        return self.s3_resource.connect().Bucket(self.case_bucket)
 
     def __generate_case_number(self):
         return datetime.utcnow().strftime(
             'cr-%y-%m%d%H-{0:04x}'
         ).format(
-            random.randint(0, 2**16)
+            random.randint(0, 2 ** 16)
         )

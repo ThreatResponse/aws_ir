@@ -75,7 +75,7 @@ class Memory(object):
             self.repo.init_gpg()
 
             return capture_client.run()
-        except Exception as ex:
+        except Exception:
             logger.critical("GPG key not in trust chain attempting interactive installation.")
-            installed = self.repo.prompt_for_install()
+            self.repo.prompt_for_install()
             return capture_client.run()

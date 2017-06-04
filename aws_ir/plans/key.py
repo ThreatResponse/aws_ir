@@ -1,7 +1,7 @@
 import logging
 
-from aws_ir.libs import connection
 from aws_ir.libs import compromised
+from aws_ir.libs import connection
 
 from aws_ir.plugins import disableaccess_key
 from aws_ir.plugins import revokests_key
@@ -53,14 +53,14 @@ class Compromise(object):
         logger.info("Attempting key disable.")
 
         # step 1 - disable access key
-        disableaccess_key.Disableaccess(
+        disableaccess_key.Plugin(
             client=client,
             compromised_resource=compromised_resource,
             dry_run=False
         )
 
         # step 2 - revoke and STS tokens issued prior to now
-        revokests_key.RevokeSTS(
+        revokests_key.Plugin(
             client=client,
             compromised_resource=compromised_resource,
             dry_run=False

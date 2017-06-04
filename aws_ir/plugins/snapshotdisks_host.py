@@ -1,7 +1,7 @@
 import boto3
 
 
-class Snapshotdisks(object):
+class Plugin(object):
     def __init__(
         self,
         client,
