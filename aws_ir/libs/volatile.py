@@ -1,6 +1,8 @@
 import logging
 import margaritashotgun
 
+from margaritashotgun.repository import Repository
+
 logger = logging.getLogger(__name__)
 
 
@@ -16,6 +18,7 @@ class Memory(object):
         self.compromised_resource = compromised_resource
         self.compromise_type = compromised_resource['compromise_type']
         self.dry_run = dry_run
+
         # Check if logging level is set to logging.DEBUG
         if logger.getEffectiveLevel() < logging.INFO:
             self.verbose = True
@@ -63,4 +66,16 @@ class Memory(object):
             library=True,
             verbose=self.verbose
         )
-        return capture_client.run()
+
+        try:
+            repository_url = 'https://threatresponse-lime-modules.s3.amazonaws.com/'
+            repository_gpg_verify = True
+
+            self.repo = Repository(repository_url, repository_gpg_verify)
+            self.repo.init_gpg()
+
+            return capture_client.run()
+        except Exception as ex:
+            logger.critical("GPG key not in trust chain attempting interactive installation.")
+            installed = self.repo.prompt_for_install()
+            return capture_client.run()

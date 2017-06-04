@@ -1,6 +1,8 @@
 import uuid
+import logging
 """ Allows the examiner cidr range access to the instance. """
 
+logger = logging.getLogger(__name__)
 
 class Plugin(object):
     def __init__(
@@ -22,11 +24,12 @@ class Plugin(object):
         sg = self.__create_isolation_security_group()
         acl = self.__create_network_acl()
         self.__add_network_acl_entries(acl)
+        self.__add_security_group_rule(sg)
+        self.__add_security_group_to_instance(sg)
 
         """Conditions that can not be dry_run"""
         if self.dry_run is not False:
             self.__add_security_group_rule(sg)
-            self.__revoke_egress(sg)
             self.__add_security_group_to_instance(sg)
 
     def validate(self):
@@ -73,13 +76,12 @@ class Plugin(object):
                 """:
                     pass
             except:
-                raise e
+                logger.info("Security group already exists. Attaching existing SG.")
 
     def __generate_security_group_name(self):
-        sg_name = "examiner-sg-{case_number}-{instance}-{uuid}".format(
+        sg_name = "examiner-sg-{case_number}-{instance}".format(
             case_number=self.compromised_resource['case_number'],
-            instance=self.compromised_resource['instance_id'],
-            uuid=str(uuid.uuid4())
+            instance=self.compromised_resource['instance_id']
         )
         self.sg_name = sg_name
         return sg_name

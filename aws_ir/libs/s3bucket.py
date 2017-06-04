@@ -1,4 +1,3 @@
-import boto3
 import uuid
 
 """Class to create the cases s3 bucket for asset storage"""
@@ -9,7 +8,7 @@ class CaseBucket(object):
         self.region = region
         self.case_number = case_number
         self.client = client
-        self.s3 = resource
+        self.s3 = resource.connect()
         self.bucket = self.find_or_create_by()
 
     def find_or_create_by(self):
@@ -95,7 +94,7 @@ class CaseBucket(object):
 
     def __get_bucket_tags(self, bucket):
         try:
-            s3 = boto3.client('s3')
+            s3 = self.client
             response = s3.get_bucket_tagging(
                 Bucket=bucket,
             )

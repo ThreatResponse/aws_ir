@@ -143,7 +143,7 @@ class Compromise(object):
                 logger.info(
                     (
                         "memory capture completed for: {0}, "
-                        "failed for: {1}".format(
+                        "failed for: {1} ".format(
                             results['completed'],
                             results['failed']
                         )
@@ -154,15 +154,15 @@ class Compromise(object):
                 if isinstance(ex, KeyboardInterrupt):
                     raise
                 else:
-                    logger.error(("Memory acquisition failure with exception"
+                    logger.error(("Memory acquisition failure with exception "
                                   "{exception}. ".format(exception=ex)))
 
         # step 6 - shutdown instance
-        stop_host.Stop(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
+       # stop_host.Stop(
+       #     client=client,
+       #     compromised_resource=compromised_resource,
+       #     dry_run=False
+       # )
 
         self.case.teardown(
             region=compromised_resource['region'],

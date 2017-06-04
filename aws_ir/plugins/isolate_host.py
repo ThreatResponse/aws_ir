@@ -51,7 +51,7 @@ class Isolate(object):
                 """:
                     security_group_result['GroupId'] = None
             except:
-                raise e
+                logger.info("Security group already exists. Attaching existing SG.")
         return security_group_result['GroupId']
 
     def __revoke_egress(self, group_id):
@@ -69,10 +69,9 @@ class Isolate(object):
         print(result)
 
     def __generate_security_group_name(self):
-        sg_name = "isolation-sg-{case_number}-{instance}-{uuid}".format(
+        sg_name = "isolation-sg-{case_number}-{instance}".format(
             case_number=self.compromised_resource['case_number'],
-            instance=self.compromised_resource['instance_id'],
-            uuid=str(uuid.uuid4())
+            instance=self.compromised_resource['instance_id']
         )
         self.sg_name = sg_name
         return sg_name

@@ -22,21 +22,23 @@ class Case(object):
         case_number=None,
         examiner_cidr_range='0.0.0.0/0',
         case_bucket=None,
-        profile=None
+        profile='default'
     ):
         self.profile = profile
 
         self.ec2_client = connection.Connection(
             type='client',
             service='ec2',
+            region='us-west-2',
             profile=self.profile
-        ).connect()
+        )
 
         self.s3_resource = connection.Connection(
             type='resource',
             service='s3',
+            region='us-west-2',
             profile=self.profile
-        ).connect()
+        )
 
         if case_number:
             self.case_number = case_number
@@ -67,7 +69,7 @@ class Case(object):
 
         logger.info(
             (
-                "Inventory Availability Zones Complete {zone_count}"
+                "Inventory Availability Zones Complete {zone_count} "
                 "found.".format(zone_count=len(self.amazon.availability_zones))
             )
         )

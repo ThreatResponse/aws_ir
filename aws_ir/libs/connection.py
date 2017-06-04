@@ -11,7 +11,6 @@ class Connection(object):
         self.profile = profile
         try:
             boto3.setup_default_session(profile_name=self.profile)
-            boto3.set_stream_logger(name='boto3', level=10, format_string=None)
         except Exception as e:
             raise(e)
 
