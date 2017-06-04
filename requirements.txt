@@ -12,3 +12,4 @@ moto
 pytest-moto
 mock
 margaritashotgun>=0.4.0
+pluginbase
