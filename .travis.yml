@@ -2,7 +2,7 @@ language: python
 python:
   - "3.6"
 before_install:
-  - "mkdir -p .aws"
+  - "mkdir -p /home/travis/.aws/"
   - "echo [default] > /home/travis/.aws/credentials"
   - "echo aws_access_key_id = sdfhdsfsadfdsfj >> /home/travis/.aws/credentials"
   - "echo aws_secret_access_key = sdfhdsfsadfdsfj >> /home/travis/.aws/credentials"
