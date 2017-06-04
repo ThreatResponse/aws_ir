@@ -7,7 +7,7 @@ gnupg
 requests
 structlog
 pytz
-logutils
+logutils=0.3.3
 moto
 pytest-moto
 mock
