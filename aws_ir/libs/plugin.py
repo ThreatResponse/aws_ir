@@ -3,6 +3,7 @@ import os
 from functools import partial
 from pluginbase import PluginBase
 
+
 class Core(object):
     """Enumerates core plugins that are part of the AWS_IR offering."""
     def __init__(self):
@@ -11,7 +12,7 @@ class Core(object):
 
         self.plugin_base = PluginBase(
             package='aws_ir.plugins',
-            searchpath = [get_path('../plugins')]
+            searchpath=[get_path('../plugins')]
         )
 
         self.source = self.plugin_base.make_plugin_source(
@@ -20,12 +21,13 @@ class Core(object):
 
         self.list = self.source.list_plugins()
 
+
 class Custom(object):
     """Enumerates core plugins that are part of the AWS_IR offering."""
     def __init__(self):
         self.plugin_base = PluginBase(
             package='aws_ir.plugins',
-            searchpath = [(os.getenv("HOME") + '/.awsir/plugins')]
+            searchpath=[(os.getenv("HOME") + '/.awsir/plugins')]
         )
 
         self.source = self.plugin_base.make_plugin_source(
