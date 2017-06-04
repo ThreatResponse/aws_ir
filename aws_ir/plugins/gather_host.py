@@ -1,4 +1,5 @@
 import base64
+import json
 
 """Gathers ephemeral data that could be lost on instance termination"""
 
@@ -61,7 +62,7 @@ class Plugin(object):
 
     def __log_aws_instance_metadata(self, data):
         if self.api is True:
-            self.evidence['metadata.json'] = data
+            self.evidence['metadata.json'] = json.dumps(data)
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-metadata.log").format(
                 case_number=self.compromised_resource['case_number'],
@@ -78,7 +79,7 @@ class Plugin(object):
 
     def __log_aws_instance_console_output(self, data):
         if self.api is True:
-            self.evidence['console.json'] = data
+            self.evidence['console.json'] = json.dumps(data)
         else:
             logfile = ("/tmp/{case_number}-{instance_id}-console.log").format(
                 case_number=self.compromised_resource['case_number'],
