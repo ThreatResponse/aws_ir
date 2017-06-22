@@ -23,6 +23,29 @@ class Core(object):
 
         self.list = self.source.list_plugins()
 
+    def key_plugins(self):
+        """Return list of only the plugins that relate to the access key."""
+        plugins = ""
+        for p in self.list:
+            if "_key" in p:
+                if plugins == "":
+                    plugins = p
+                else:
+                    plugins = plugins + ',' + p
+        return plugins
+
+    def instance_plugins(self):
+        """Return list of only the plugins that relate to the instance compromise."""
+        plugins = ""
+        for p in self.list:
+            if "_host" in p:
+                if plugins == "":
+                    plugins = p
+                else:
+                    plugins = plugins + ',' + p
+        plugins = plugins + ',' + 'get_memory'
+        return plugins
+
 
 class Custom(object):
     """Enumerates core plugins that are part of the AWS_IR offering."""

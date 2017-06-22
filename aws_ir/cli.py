@@ -7,6 +7,7 @@ import sys
 import aws_ir
 from aws_ir import __version__
 from aws_ir.libs import case
+from aws_ir.libs import plugin
 
 # Support for multiple incident plans coming soon
 from aws_ir.plans import host
@@ -20,6 +21,7 @@ class cli():
     def __init__(self):
         self.config = None
         self.prog = sys.argv[0].split('/')[-1]
+        print(plugin.Core().key_plugins())
 
     """Parent parser for top level flags"""
     def parse_args(self, args):
@@ -115,6 +117,21 @@ class cli():
             required=True,
             help='provide the path to the ssh private key for the user.'
         )
+
+        instance_compromise_parser.add_argument(
+            '--plugins',
+            required=False,
+            default="gather_host,isolate_host,"
+                    "tag_host,snapshotdisks_host,"
+                    "examineracl_host,get_memory,stop_host",
+            help="Run some or all of the plugins in a custom order. "
+                 "Provided as a comma separated list"
+                 "Supported plugins: \n"
+                 "{p}".format(
+                    p=plugin.Core().instance_plugins()
+                 )
+        )
+
         instance_compromise_parser.set_defaults(func="instance_compromise")
 
         key_compromise_parser = subparsers.add_parser(
@@ -124,6 +141,18 @@ class cli():
 
         key_compromise_parser.add_argument(
             '--access-key-id', required=True, help=''
+        )
+
+        key_compromise_parser.add_argument(
+            '--plugins',
+            default="disableaccess_key,revokests_key",
+            required=False,
+            help="Run some or all of the plugins in a custom order."
+                 " Provided as a comma separated list"
+                 "Supported plugins: \n"
+                 "{p}".format(
+                    p=plugin.Core().key_plugins()
+                 )
         )
 
         key_compromise_parser.set_defaults(func="key_compromise")
@@ -158,7 +187,8 @@ class cli():
                 ssh_key_file=self.config.ssh_key,
                 compromised_host_ip=self.config.instance_ip,
                 prog=self.prog,
-                case=case_obj
+                case=case_obj,
+                steps=self.config.plugins
             )
 
             try:
@@ -169,7 +199,8 @@ class cli():
             kc = key.Compromise(
                 self.config.examiner_cidr_range,
                 self.config.access_key_id,
-                case=case_obj
+                case_obj,
+                self.config.plugins
             )
 
             try:
