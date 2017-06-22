@@ -1,5 +1,6 @@
-import os
 import aws_ir_plugins
+import os
+
 
 from functools import partial
 from pluginbase import PluginBase

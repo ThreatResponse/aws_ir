@@ -3,14 +3,8 @@ import os
 
 from aws_ir.libs import compromised
 from aws_ir.libs import connection
+from aws_ir.libs import plugin
 from aws_ir.libs import volatile
-
-from aws_ir.plugins import examineracl_host
-from aws_ir.plugins import gather_host
-from aws_ir.plugins import isolate_host
-from aws_ir.plugins import snapshotdisks_host
-from aws_ir.plugins import stop_host
-from aws_ir.plugins import tag_host
 
 
 logger = logging.getLogger(__name__)
@@ -53,6 +47,17 @@ class Compromise(object):
         self.compromised_host_ip = compromised_host_ip
         self.case = case
 
+        self.plugins = plugin.Core()
+        self.steps = [
+            'gather_host',
+            'isolate_host',
+            'tag_host',
+            'snapshotdisks_host',
+            'examineracl_host',
+            'get_memory',
+            'stop_host'
+        ]
+
     def mitigate(self):
 
         self.case.prep_aws_connections()
@@ -77,55 +82,34 @@ class Compromise(object):
             region=compromised_resource['region']
         ).connect()
 
-        # step 1 - get instance metadata and store it
-        gather_host.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
+        for action in self.steps:
+            if action is not 'get_memory':
+                step = self.plugins.source.load_plugin(action)
+                step.Plugin(
+                    client=client,
+                    compromised_resource=compromised_resource,
+                    dry_run=False
+                )
+            elif action is 'get_memory':
+                self.do_mem(client, compromised_resource)
 
-        # step 2 - isolate
-        isolate_host.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
-
-        # step 3 - apply compromised tag
-        tag_host.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
-
-        # step 4 - create snapshot
-        snapshotdisks_host.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
-
-        # step 5 - gather memory
+    def do_mem(self, client, compromised_resource):
         if compromised_resource['platform'] == 'windows':
             logger.info('Platform is Windows skipping live memory')
-        elif self.case.examiner_cidr_range is '0.0.0.0/0':
+        elif self.case.examiner_cidr_range == '0.0.0.0/0':
             logger.info(
-                "Examing CIDR not provided skipping memory acquisition."
+                "Examiner CIDR not provided skipping memory acquisition."
             )
         else:
-            logger.info("Adding examiner exception to isolated instance.")
-            examineracl_host.Plugin(
-                client=client,
-                compromised_resource=compromised_resource,
-                dry_run=False
+            logger.info(
+                (
+                    "Attempting run margarita shotgun for {user} on {ip} with {keyfile}".format(
+                        user=self.user,
+                        ip=self.compromised_host_ip,
+                        keyfile=self.ssh_key_file_path
+                    )
+                )
             )
-
-            logger.info(("Attempting run margarita shotgun for {user} on "
-                         "{ip} with {keyfile}".format(
-                             user=self.user,
-                             ip=self.compromised_host_ip,
-                             keyfile=self.ssh_key_file_path
-                         )))
 
             try:
                 volatile_data = volatile.Memory(
@@ -158,15 +142,3 @@ class Compromise(object):
                 else:
                     logger.error(("Memory acquisition failure with exception "
                                   "{exception}. ".format(exception=ex)))
-
-        # step 6 - shutdown instance
-        stop_host.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
-
-        self.case.teardown(
-            region=compromised_resource['region'],
-            resource_id=compromised_resource['instance_id']
-        )

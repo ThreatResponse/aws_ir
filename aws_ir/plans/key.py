@@ -2,9 +2,7 @@ import logging
 
 from aws_ir.libs import compromised
 from aws_ir.libs import connection
-
-from aws_ir.plugins import disableaccess_key
-from aws_ir.plugins import revokests_key
+from aws_ir.libs import plugin
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +29,8 @@ class Compromise(object):
         self.compromised_access_key_id = compromised_access_key_id
         self.region = region
         self.case = case
+        self.plugins = plugin.Core()
+        self.steps = ['disableaccess_key', 'revokests_key']
 
     def mitigate(self):
         """Any steps that run as part of key compromises."""
@@ -52,19 +52,13 @@ class Compromise(object):
 
         logger.info("Attempting key disable.")
 
-        # step 1 - disable access key
-        disableaccess_key.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
-
-        # step 2 - revoke and STS tokens issued prior to now
-        revokests_key.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
+        for action in self.steps:
+            step = self.plugins.source.load_plugin(action)
+            step.Plugin(
+                client=client,
+                compromised_resource=compromised_resource,
+                dry_run=False
+            )
 
         logger.info("STS Tokens revoked issued prior to NOW.")
 
