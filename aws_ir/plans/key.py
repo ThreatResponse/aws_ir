@@ -34,7 +34,7 @@ class Compromise(object):
         self.case = case
         self.plugins = plugin.Core()
         self.steps = steps_to_list(steps)
-
+        
     def mitigate(self):
         """Any steps that run as part of key compromises."""
         access_key = self.compromised_access_key_id
