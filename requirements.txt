@@ -13,3 +13,4 @@ pytest-moto
 mock
 margaritashotgun>=0.4.0
 pluginbase
+git+git://github.com/threatresponse/aws_ir_plugins.git

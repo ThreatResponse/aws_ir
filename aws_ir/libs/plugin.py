@@ -1,4 +1,5 @@
 import os
+import aws_ir_plugins
 
 from functools import partial
 from pluginbase import PluginBase
@@ -12,11 +13,11 @@ class Core(object):
 
         self.plugin_base = PluginBase(
             package='aws_ir.plugins',
-            searchpath=[get_path('../plugins')]
+            searchpath=[os.path.dirname(aws_ir_plugins.__file__)]
         )
 
         self.source = self.plugin_base.make_plugin_source(
-            searchpath=[get_path('../plugins'), get_path('~/.awsir/plugins')]
+            searchpath=[os.path.dirname(aws_ir_plugins.__file__), get_path('~/.awsir/plugins')]
         )
 
         self.list = self.source.list_plugins()
