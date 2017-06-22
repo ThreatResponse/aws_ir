@@ -7,6 +7,9 @@ from aws_ir.libs import plugin
 from aws_ir.libs import volatile
 
 
+from aws_ir.plans import steps_to_list
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -24,7 +27,8 @@ class Compromise(object):
             ssh_key_file=None,
             compromised_host_ip=None,
             prog=None,
-            case=None
+            case=None,
+            steps=None
     ):
 
         if compromised_host_ip is None:
@@ -48,15 +52,8 @@ class Compromise(object):
         self.case = case
 
         self.plugins = plugin.Core()
-        self.steps = [
-            'gather_host',
-            'isolate_host',
-            'tag_host',
-            'snapshotdisks_host',
-            'examineracl_host',
-            'get_memory',
-            'stop_host'
-        ]
+        self.steps = steps_to_list(steps)
+
 
     def mitigate(self):
 
