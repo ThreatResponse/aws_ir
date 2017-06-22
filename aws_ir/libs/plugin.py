@@ -46,6 +46,7 @@ class Core(object):
         plugins = plugins + ',' + 'get_memory'
         return plugins
 
+
 class Custom(object):
     """Enumerates core plugins that are part of the AWS_IR offering."""
     def __init__(self):

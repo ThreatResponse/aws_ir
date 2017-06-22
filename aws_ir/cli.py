@@ -121,12 +121,15 @@ class cli():
         instance_compromise_parser.add_argument(
             '--plugins',
             required=False,
-            default="gather_host,isolate_host,tag_host,snapshotdisks_host,examineracl_host,get_memory,stop_host",
-            help="Run some or all of the plugins in a custom order. Provided as a comma separated list"
+            default="gather_host,isolate_host,"
+                    "tag_host,snapshotdisks_host,"
+                    "examineracl_host,get_memory,stop_host",
+            help="Run some or all of the plugins in a custom order. "
+                 "Provided as a comma separated list"
                  "Supported plugins: \n"
                  "{p}".format(
-                p=plugin.Core().instance_plugins()
-            )
+                    p=plugin.Core().instance_plugins()
+                 )
         )
 
         instance_compromise_parser.set_defaults(func="instance_compromise")
@@ -144,11 +147,12 @@ class cli():
             '--plugins',
             default="disableaccess_key,revokests_key",
             required=False,
-            help="Run some or all of the plugins in a custom order. Provided as a comma separated list"
+            help="Run some or all of the plugins in a custom order."
+                 " Provided as a comma separated list"
                  "Supported plugins: \n"
                  "{p}".format(
-                p=plugin.Core().key_plugins()
-            )
+                    p=plugin.Core().key_plugins()
+                 )
         )
 
         key_compromise_parser.set_defaults(func="key_compromise")

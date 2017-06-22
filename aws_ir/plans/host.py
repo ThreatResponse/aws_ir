@@ -6,7 +6,7 @@ from aws_ir.libs import connection
 from aws_ir.libs import plugin
 from aws_ir.libs import volatile
 
-from . import steps_to_list
+from aws_ir.plans import steps_to_list
 
 logger = logging.getLogger(__name__)
 
