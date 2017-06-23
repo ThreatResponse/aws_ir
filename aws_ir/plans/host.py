@@ -1,5 +1,4 @@
 import logging
-import os
 
 from aws_ir.libs import compromised
 from aws_ir.libs import connection
@@ -24,22 +23,15 @@ class Compromise(object):
             self,
             user=None,
             ssh_key_file=None,
-            compromised_host_ip=None,
+            target=None,
             prog=None,
             case=None,
             steps=None
     ):
 
-        if compromised_host_ip is None:
+        if target is None:
             raise ValueError(
-                'Must specifiy an IP for the compromised host'
-            )
-
-        if not os.path.exists(ssh_key_file):
-            raise ValueError(
-                'Key file must exist. Could not find path {0}'.format(
-                    ssh_key_file
-                )
+                'You must specify an ip-address or instance-id.'
             )
 
         self.prog = prog
@@ -47,22 +39,36 @@ class Compromise(object):
         self.user = user
         self.case_type = 'Host'
 
-        self.compromised_host_ip = compromised_host_ip
+        self.target = target
         self.case = case
 
         self.plugins = plugin.Core()
         self.steps = steps_to_list(steps)
 
+    def _target_type(self):
+        """Returns the target type based on regex."""
+        if len(self.target.split('.')) is 4:
+            return 'ip-address'
+        else:
+            return 'instance-id'
+
     def mitigate(self):
 
         self.case.prep_aws_connections()
 
-        search = self.case.aws_inventory.locate_instance(
-            self.compromised_host_ip
-        )
+        if self._target_type() == 'ip-address':
+            search = self.case.aws_inventory.locate_instance_by_ip(
+                self.target
+            )
+        if self._target_type() == 'instance-id':
+            search = self.case.aws_inventory.locate_instance_by_id(
+                self.target
+            )
 
         if search is None:
-            raise ValueError('Compromised IP Address not found in inventory.')
+            raise ValueError(
+                'Target ip-address or instance-id not found in inventory.'
+            )
 
         compromised_resource = compromised.CompromisedMetadata(
             compromised_object_inventory=search,
@@ -77,15 +83,23 @@ class Compromise(object):
             region=compromised_resource['region']
         ).connect()
 
+        logger.info(
+            "Proceeding with incident plan steps included are {steps}".format(steps=self.steps)
+        )
+
         for action in self.steps:
-            if action is not 'get_memory':
+            logger.info("Executing asasdasdadd step {step}.".format(step=action))
+            if 'get_memory' not in action:
                 step = self.plugins.source.load_plugin(action)
                 step.Plugin(
                     client=client,
                     compromised_resource=compromised_resource,
                     dry_run=False
                 )
-            elif action is 'get_memory':
+                logger.info('woooooo')
+            elif 'get_memory' == action:
+                logger.info('woooooo')
+                logger.info("attempting memory run")
                 self.do_mem(client, compromised_resource)
 
     def do_mem(self, client, compromised_resource):
@@ -100,7 +114,7 @@ class Compromise(object):
                 (
                     "Attempting run margarita shotgun for {user} on {ip} with {keyfile}".format(
                         user=self.user,
-                        ip=self.compromised_host_ip,
+                        ip=compromised_resource.get('public_ip_address', None),
                         keyfile=self.ssh_key_file_path
                     )
                 )
@@ -115,11 +129,13 @@ class Compromise(object):
 
                 results = volatile_data.get_memory(
                     bucket=self.case.case_bucket,
-                    ip=self.compromised_host_ip,
+                    ip=compromised_resource['public_ip_address'],
                     user=self.user,
                     key=self.ssh_key_file_path,
                     case_number=self.case.case_number
                 )
+
+                print(results)
 
                 logger.info(
                     (

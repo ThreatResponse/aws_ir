@@ -53,17 +53,19 @@ class Compromise(object):
             region=compromised_resource['region']
         ).connect()
 
-        logger.info("Attempting key disable.")
+        logger.info(
+            "Proceeding with incident plan steps included are {steps}".format(steps=self.steps)
+        )
 
         for action in self.steps:
+            logger.info("Executing step {step}.".format(step=action))
+
             step = self.plugins.source.load_plugin(action)
             step.Plugin(
                 client=client,
                 compromised_resource=compromised_resource,
                 dry_run=False
             )
-
-        logger.info("STS Tokens revoked issued prior to NOW.")
 
         logger.info("Disable complete.  Uploading results.")
 

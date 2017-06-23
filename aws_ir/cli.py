@@ -21,7 +21,6 @@ class cli():
     def __init__(self):
         self.config = None
         self.prog = sys.argv[0].split('/')[-1]
-        print(plugin.Core().key_plugins())
 
     """Parent parser for top level flags"""
     def parse_args(self, args):
@@ -101,9 +100,11 @@ class cli():
         )
 
         instance_compromise_parser.add_argument(
-            '--instance-ip',
+            '--target',
             required=True,
-            help='')
+            help='instance-id|instance-ip'
+        )
+
         instance_compromise_parser.add_argument(
             '--user',
             required=True,
@@ -185,7 +186,7 @@ class cli():
             hc = host.Compromise(
                 user=self.config.user,
                 ssh_key_file=self.config.ssh_key,
-                compromised_host_ip=self.config.instance_ip,
+                target=self.config.target,
                 prog=self.prog,
                 case=case_obj,
                 steps=self.config.plugins
