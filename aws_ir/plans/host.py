@@ -53,9 +53,6 @@ class Compromise(object):
             return 'instance-id'
 
     def mitigate(self):
-
-        self.case.prep_aws_connections()
-
         if self._target_type() == 'ip-address':
             search = self.case.aws_inventory.locate_instance_by_ip(
                 self.target
@@ -88,7 +85,7 @@ class Compromise(object):
         )
 
         for action in self.steps:
-            logger.info("Executing asasdasdadd step {step}.".format(step=action))
+            logger.info("Executing step {step}.".format(step=action))
             if 'get_memory' not in action:
                 step = self.plugins.source.load_plugin(action)
                 step.Plugin(
@@ -96,9 +93,7 @@ class Compromise(object):
                     compromised_resource=compromised_resource,
                     dry_run=False
                 )
-                logger.info('woooooo')
             elif 'get_memory' == action:
-                logger.info('woooooo')
                 logger.info("attempting memory run")
                 self.do_mem(client, compromised_resource)
 
@@ -134,8 +129,6 @@ class Compromise(object):
                     key=self.ssh_key_file_path,
                     case_number=self.case.case_number
                 )
-
-                print(results)
 
                 logger.info(
                     (
