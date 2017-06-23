@@ -114,8 +114,6 @@ class cli():
             help="""
                 File of resources to process instance-id or ip-address.
             """
-            required=True,
-            help='instance-id|instance-ip'
         )
 
         instance_compromise_parser.add_argument(
