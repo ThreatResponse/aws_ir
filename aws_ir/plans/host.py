@@ -53,6 +53,7 @@ class Compromise(object):
             return 'instance-id'
 
     def mitigate(self):
+
         if self._target_type() == 'ip-address':
             search = self.case.aws_inventory.locate_instance_by_ip(
                 self.target
@@ -129,6 +130,8 @@ class Compromise(object):
                     key=self.ssh_key_file_path,
                     case_number=self.case.case_number
                 )
+
+                print(results)
 
                 logger.info(
                     (
