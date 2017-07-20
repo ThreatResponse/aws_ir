@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import logging
+import os
 import sys
 
 
@@ -101,22 +102,33 @@ class cli():
 
         instance_compromise_parser.add_argument(
             '--target',
-            required=True,
-            help='instance-id|instance-ip'
+            required=False,
+            help="""
+                instance-id|instance-ip
+            """
+        )
+
+        instance_compromise_parser.add_argument(
+            '--targets',
+            required=False,
+            help="""
+                File of resources to process instance-id or ip-address.
+            """
         )
 
         instance_compromise_parser.add_argument(
             '--user',
-            required=True,
+            required=False,
             help="""
                 this is the privileged ssh user
                 for acquiring memory from the instance.
+                Required for memory only.
             """
         )
         instance_compromise_parser.add_argument(
             '--ssh-key',
-            required=True,
-            help='provide the path to the ssh private key for the user.'
+            required=False,
+            help='provide the path to the ssh private key for the user. Required for memory only.'
         )
 
         instance_compromise_parser.add_argument(
@@ -126,8 +138,8 @@ class cli():
                     "tag_host,snapshotdisks_host,"
                     "examineracl_host,get_memory,stop_host",
             help="Run some or all of the plugins in a custom order. "
-                 "Provided as a comma separated list"
-                 "Supported plugins: \n"
+                 "Provided as a comma separated list of "
+                 "supported plugins: \n"
                  "{p}".format(
                     p=plugin.Core().instance_plugins()
                  )
@@ -181,21 +193,45 @@ class cli():
 
         aws_ir.wrap_log_file(case_obj.case_number)
         logger.info("Initialization successful proceeding to incident plan.")
-
+        case_obj.prep_aws_connections()
         if self.config.func == 'instance_compromise':
-            hc = host.Compromise(
-                user=self.config.user,
-                ssh_key_file=self.config.ssh_key,
-                target=self.config.target,
-                prog=self.prog,
-                case=case_obj,
-                steps=self.config.plugins
-            )
+            if self.config.target:
+                hc = host.Compromise(
+                    user=self.config.user,
+                    ssh_key_file=self.config.ssh_key,
+                    target=self.config.target,
+                    prog=self.prog,
+                    case=case_obj,
+                    steps=self.config.plugins
+                )
+                try:
+                    hc.mitigate()
+                except KeyboardInterrupt:
+                    pass
+            if self.config.targets:
+                logger.info(
+                    'Alert : multi-host mode engaged targets in file will attempt processing.'
+                )
+                batch_file = os.path.abspath(self.config.targets)
 
-            try:
-                hc.mitigate()
-            except KeyboardInterrupt:
-                pass
+                with open(batch_file) as f:
+                    targets = f.read().split('\n')
+
+                for target in targets:
+                    if target is not '':
+                        hc = host.Compromise(
+                            user=self.config.user,
+                            ssh_key_file=self.config.ssh_key,
+                            target=target,
+                            prog=self.prog,
+                            case=case_obj,
+                            steps=self.config.plugins
+                        )
+                        try:
+                            logger.info("Attempting processing instance {i}".format(i=target))
+                            hc.mitigate()
+                        except KeyboardInterrupt:
+                            pass
         elif self.config.func == 'key_compromise':
             kc = key.Compromise(
                 self.config.examiner_cidr_range,
