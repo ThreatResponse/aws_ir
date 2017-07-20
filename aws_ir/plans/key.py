@@ -2,15 +2,12 @@ import logging
 
 from aws_ir.libs import compromised
 from aws_ir.libs import connection
-
-from aws_ir.plugins import disableaccess_key
-from aws_ir.plugins import revokests_key
+from aws_ir.libs import plugin
 
 logger = logging.getLogger(__name__)
 
 
 """Compromise class for Key Compromise Procedure"""
-
 
 class Compromise(object):
 
@@ -24,13 +21,15 @@ class Compromise(object):
 
         if compromised_access_key_id is None:
             raise ValueError(
-                'Must specifiy an access_key_id for the compromised key.'
+                'Must specify an access_key_id for the compromised key.'
             )
 
         self.case_type = 'Key'
         self.compromised_access_key_id = compromised_access_key_id
         self.region = region
         self.case = case
+        self.plugins = plugin.Core()
+        self.steps = ['disableaccess_key', 'revokests_key']
 
     def mitigate(self):
         """Any steps that run as part of key compromises."""
@@ -44,27 +43,20 @@ class Compromise(object):
             type_of_compromise='key_compromise'
         ).data()
 
-        client = connection.Connection(
-            type='client',
-            service='iam',
+        session = connection.Connection(
+            type='session',
             region=compromised_resource['region']
         ).connect()
 
         logger.info("Attempting key disable.")
 
-        # step 1 - disable access key
-        disableaccess_key.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
-
-        # step 2 - revoke and STS tokens issued prior to now
-        revokests_key.Plugin(
-            client=client,
-            compromised_resource=compromised_resource,
-            dry_run=False
-        )
+        for action in self.steps:
+            step = self.plugins.source.load_plugin(action)
+            step.Plugin(
+                boto_session=session,
+                compromised_resource=compromised_resource,
+                dry_run=False
+            )
 
         logger.info("STS Tokens revoked issued prior to NOW.")
 
