@@ -1,5 +1,6 @@
 import logging
 import margaritashotgun
+import platform
 
 from margaritashotgun.repository import Repository
 
@@ -60,6 +61,8 @@ class Memory(object):
                      '-modules.s3.amazonaws.com/')
             )
         )
+        if 'Darwin' in platform.system():
+            config['repository']['gpg_verify'] = False
         capture_client = margaritashotgun.client(
             name=name,
             config=config,
@@ -69,13 +72,19 @@ class Memory(object):
 
         try:
             repository_url = 'https://threatresponse-lime-modules.s3.amazonaws.com/'
-            repository_gpg_verify = True
+            if 'Darwin' in platform.system():
+                repository_gpg_verify = False
+            else:
+                repository_gpg_verify = True
 
             self.repo = Repository(repository_url, repository_gpg_verify)
-            self.repo.init_gpg()
+
+            if 'Darwin' not in platform.system():
+                self.repo.init_gpg()
 
             return capture_client.run()
         except Exception:
-            logger.critical("GPG key not in trust chain attempting interactive installation.")
-            self.repo.prompt_for_install()
+            if 'Darwin' not in platform.system():
+                logger.critical("GPG key not in trust chain attempting interactive installation.")
+                self.repo.prompt_for_install()
             return capture_client.run()

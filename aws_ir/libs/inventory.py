@@ -72,11 +72,25 @@ class Inventory(object):
             self.type
         ).result
 
-    def locate_instance(self, ip):
+    def locate_instance_by_ip(self, ip):
         for region in self.regions:
             located = list(
                 filter(
                     lambda x: x['public_ip_address'] == ip,
+                    self.inventory[region]
+                )
+            )
+
+            if len(located) == 0:
+                pass
+            else:
+                return located[0]
+
+    def locate_instance_by_id(self, instance_id):
+        for region in self.regions:
+            located = list(
+                filter(
+                    lambda x: x['instance_id'] == instance_id,
                     self.inventory[region]
                 )
             )

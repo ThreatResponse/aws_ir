@@ -29,7 +29,7 @@ def test_parse_args():
     ssh_key = "ssh.key"
     instance_compromise_args = [
         "instance-compromise",
-        "--instance-ip",
+        "--target",
         instance_ip,
         "--user",
         user,
@@ -55,7 +55,7 @@ def test_parse_args():
     assert parsed_instance_args.bucket_name == bucket_name
     assert parsed_instance_args.dry_run is True
     # Check instance-compromise required arguments
-    assert parsed_instance_args.instance_ip == instance_ip
+    assert parsed_instance_args.target == instance_ip
     assert parsed_instance_args.user == user
     assert parsed_instance_args.ssh_key == ssh_key
     # Check Key Compromise required arguments are not present
