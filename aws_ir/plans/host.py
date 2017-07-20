@@ -75,7 +75,7 @@ class Compromise(object):
             examiner_cidr_range=self.case.examiner_cidr_range
         ).data()
 
-        client = connection.Connection(
+        session = connection.Connection(
             type='session',
             region=compromised_resource['region']
         ).connect()

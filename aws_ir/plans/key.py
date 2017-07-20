@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 """Compromise class for Key Compromise Procedure"""
 
+
 class Compromise(object):
 
     def __init__(
