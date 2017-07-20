@@ -50,8 +50,11 @@ class TestCaseLib(object):
             self.log_base = os.path.dirname(os.path.abspath(__file__))
 
             # create test files
-            self.test_log = "{0}/{1}-aws_ir.log".format(self.log_base,
-                                                         self.generic_case.case_number)
+            self.test_log = "{0}/{1}-aws_ir.log".format(
+                self.log_base,
+                self.generic_case.case_number
+            )
+
             self.renamed_test_log = "{0}/{1}-{2}-aws_ir.log".format(
                 self.log_base,
                 self.generic_case.case_number,
@@ -186,8 +189,11 @@ class TestCaseLib(object):
             self.log_base = os.path.dirname(os.path.abspath(__file__))
 
             # create test files
-            self.test_log = "{0}/{1}-aws_ir.log".format(self.log_base,
-                                                         self.generic_case.case_number)
+            self.test_log = "{0}/{1}-aws_ir.log".format(
+                self.log_base,
+                self.generic_case.case_number
+            )
+
             self.renamed_test_log = "{0}/{1}-{2}-aws_ir.log".format(
                 self.log_base,
                 self.generic_case.case_number,
@@ -208,7 +214,7 @@ class TestCaseLib(object):
                 f.write('test jpg data')
                 f.close()
 
-            result = self.generic_case._Case__rename_log_file(
+            self.generic_case._Case__rename_log_file(
                 self.generic_case.case_number,
                 'i-12345678',
                 base_dir=self.log_base
