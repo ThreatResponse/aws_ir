@@ -14,11 +14,17 @@ class Core(object):
 
         self.plugin_base = PluginBase(
             package='aws_ir.plugins',
-            searchpath=[os.path.dirname(aws_ir_plugins.__file__)]
+            searchpath=[
+                os.path.dirname(aws_ir_plugins.__file__),
+                (os.getenv("HOME") + '/.awsir/plugins')
+            ]
         )
 
         self.source = self.plugin_base.make_plugin_source(
-            searchpath=[os.path.dirname(aws_ir_plugins.__file__), get_path('~/.awsir/plugins')]
+            searchpath=[
+                os.path.dirname(aws_ir_plugins.__file__),
+                (os.getenv("HOME") + '/.awsir/plugins')
+            ]
         )
 
         self.list = self.source.list_plugins()
@@ -46,17 +52,13 @@ class Core(object):
         plugins = plugins + ',' + 'get_memory'
         return plugins
 
-
-class Custom(object):
-    """Enumerates core plugins that are part of the AWS_IR offering."""
-    def __init__(self):
-        self.plugin_base = PluginBase(
-            package='aws_ir.plugins',
-            searchpath=[(os.getenv("HOME") + '/.awsir/plugins')]
-        )
-
-        self.source = self.plugin_base.make_plugin_source(
-            searchpath=[(os.getenv("HOME") + '/.awsir/plugins')]
-        )
-
-        self.list = self.source.list_plugins()
+    def lambda_plugins(self):
+        """Return list of only the plugins that relate to the lambda compromise."""
+        plugins = ""
+        for p in self.list:
+            if "_lambda" in p:
+                if plugins == "":
+                    plugins = p
+                else:
+                    plugins = plugins + ',' + p
+        return plugins
