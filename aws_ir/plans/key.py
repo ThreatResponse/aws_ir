@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 """Compromise class for Key Compromise Procedure"""
 
-
 class Compromise(object):
 
     def __init__(
@@ -25,7 +24,7 @@ class Compromise(object):
 
         if compromised_access_key_id is None:
             raise ValueError(
-                'Must specifiy an access_key_id for the compromised key.'
+                'Must specify an access_key_id for the compromised key.'
             )
 
         self.case_type = 'Key'
@@ -47,25 +46,22 @@ class Compromise(object):
             type_of_compromise='key_compromise'
         ).data()
 
-        client = connection.Connection(
-            type='client',
-            service='iam',
+        session = connection.Connection(
+            type='session',
             region=compromised_resource['region']
         ).connect()
 
-        logger.info(
-            "Proceeding with incident plan steps included are {steps}".format(steps=self.steps)
-        )
+        logger.info("Attempting key disable.")
 
         for action in self.steps:
-            logger.info("Executing step {step}.".format(step=action))
-
             step = self.plugins.source.load_plugin(action)
             step.Plugin(
-                client=client,
+                boto_session=session,
                 compromised_resource=compromised_resource,
                 dry_run=False
             )
+
+        logger.info("STS Tokens revoked issued prior to NOW.")
 
         logger.info("Disable complete.  Uploading results.")
 

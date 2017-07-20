@@ -76,8 +76,7 @@ class Compromise(object):
         ).data()
 
         client = connection.Connection(
-            type='client',
-            service='ec2',
+            type='session',
             region=compromised_resource['region']
         ).connect()
 
@@ -90,7 +89,7 @@ class Compromise(object):
             if 'get_memory' not in action:
                 step = self.plugins.source.load_plugin(action)
                 step.Plugin(
-                    client=client,
+                    boto_session=session,
                     compromised_resource=compromised_resource,
                     dry_run=False
                 )
@@ -98,7 +97,7 @@ class Compromise(object):
                 logger.info("attempting memory run")
                 self.do_mem(client, compromised_resource)
 
-    def do_mem(self, client, compromised_resource):
+    def do_mem(self, session, compromised_resource):
         if compromised_resource['platform'] == 'windows':
             logger.info('Platform is Windows skipping live memory')
         elif self.case.examiner_cidr_range == '0.0.0.0/0':
@@ -118,7 +117,7 @@ class Compromise(object):
 
             try:
                 volatile_data = volatile.Memory(
-                    client=client,
+                    boto_session=session,
                     compromised_resource=compromised_resource,
                     dry_run=False
                 )
