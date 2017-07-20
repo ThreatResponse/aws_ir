@@ -11,10 +11,10 @@ class Memory(object):
         self,
         compromised_resource,
         dry_run,
-        client=None
+        boto_session
     ):
 
-        self.client = client
+        self.session = boto_session
         self.compromised_resource = compromised_resource
         self.compromise_type = compromised_resource['compromise_type']
         self.dry_run = dry_run
