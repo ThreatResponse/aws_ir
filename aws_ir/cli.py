@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 import argparse
 import logging
+import os
 import sys
 
 
 import aws_ir
 from aws_ir import __version__
 from aws_ir.libs import case
+from aws_ir.libs import plugin
 
 # Support for multiple incident plans coming soon
 from aws_ir.plans import host
@@ -99,22 +101,50 @@ class cli():
         )
 
         instance_compromise_parser.add_argument(
-            '--instance-ip',
-            required=True,
-            help='')
+            '--target',
+            required=False,
+            help="""
+                instance-id|instance-ip
+            """
+        )
+
+        instance_compromise_parser.add_argument(
+            '--targets',
+            required=False,
+            help="""
+                File of resources to process instance-id or ip-address.
+            """
+        )
+
         instance_compromise_parser.add_argument(
             '--user',
-            required=True,
+            required=False,
             help="""
                 this is the privileged ssh user
                 for acquiring memory from the instance.
+                Required for memory only.
             """
         )
         instance_compromise_parser.add_argument(
             '--ssh-key',
-            required=True,
-            help='provide the path to the ssh private key for the user.'
+            required=False,
+            help='provide the path to the ssh private key for the user. Required for memory only.'
         )
+
+        instance_compromise_parser.add_argument(
+            '--plugins',
+            required=False,
+            default="gather_host,isolate_host,"
+                    "tag_host,snapshotdisks_host,"
+                    "examineracl_host,get_memory,stop_host",
+            help="Run some or all of the plugins in a custom order. "
+                 "Provided as a comma separated list of "
+                 "supported plugins: \n"
+                 "{p}".format(
+                    p=plugin.Core().instance_plugins()
+                 )
+        )
+
         instance_compromise_parser.set_defaults(func="instance_compromise")
 
         key_compromise_parser = subparsers.add_parser(
@@ -124,6 +154,18 @@ class cli():
 
         key_compromise_parser.add_argument(
             '--access-key-id', required=True, help=''
+        )
+
+        key_compromise_parser.add_argument(
+            '--plugins',
+            default="disableaccess_key,revokests_key",
+            required=False,
+            help="Run some or all of the plugins in a custom order."
+                 " Provided as a comma separated list"
+                 "Supported plugins: \n"
+                 "{p}".format(
+                    p=plugin.Core().key_plugins()
+                 )
         )
 
         key_compromise_parser.set_defaults(func="key_compromise")
@@ -151,25 +193,51 @@ class cli():
 
         aws_ir.wrap_log_file(case_obj.case_number)
         logger.info("Initialization successful proceeding to incident plan.")
-
+        case_obj.prep_aws_connections()
         if self.config.func == 'instance_compromise':
-            hc = host.Compromise(
-                user=self.config.user,
-                ssh_key_file=self.config.ssh_key,
-                compromised_host_ip=self.config.instance_ip,
-                prog=self.prog,
-                case=case_obj
-            )
+            if self.config.target:
+                hc = host.Compromise(
+                    user=self.config.user,
+                    ssh_key_file=self.config.ssh_key,
+                    target=self.config.target,
+                    prog=self.prog,
+                    case=case_obj,
+                    steps=self.config.plugins
+                )
+                try:
+                    hc.mitigate()
+                except KeyboardInterrupt:
+                    pass
+            if self.config.targets:
+                logger.info(
+                    'Alert : multi-host mode engaged targets in file will attempt processing.'
+                )
+                batch_file = os.path.abspath(self.config.targets)
 
-            try:
-                hc.mitigate()
-            except KeyboardInterrupt:
-                pass
+                with open(batch_file) as f:
+                    targets = f.read().split('\n')
+
+                for target in targets:
+                    if target is not '':
+                        hc = host.Compromise(
+                            user=self.config.user,
+                            ssh_key_file=self.config.ssh_key,
+                            target=target,
+                            prog=self.prog,
+                            case=case_obj,
+                            steps=self.config.plugins
+                        )
+                        try:
+                            logger.info("Attempting processing instance {i}".format(i=target))
+                            hc.mitigate()
+                        except KeyboardInterrupt:
+                            pass
         elif self.config.func == 'key_compromise':
             kc = key.Compromise(
                 self.config.examiner_cidr_range,
                 self.config.access_key_id,
-                case=case_obj
+                case_obj,
+                self.config.plugins
             )
 
             try:
