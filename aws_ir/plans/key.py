@@ -4,13 +4,10 @@ from aws_ir.libs import compromised
 from aws_ir.libs import connection
 from aws_ir.libs import plugin
 
-from aws_ir.plans import steps_to_list
-
 logger = logging.getLogger(__name__)
 
 
 """Compromise class for Key Compromise Procedure"""
-
 
 class Compromise(object):
 
@@ -19,13 +16,12 @@ class Compromise(object):
         examiner_cidr_range='0.0.0.0/0',
         compromised_access_key_id=None,
         region='us-west-2',
-        case=None,
-        steps=None
+        case=None
     ):
 
         if compromised_access_key_id is None:
             raise ValueError(
-                'Must specifiy an access_key_id for the compromised key.'
+                'Must specify an access_key_id for the compromised key.'
             )
 
         self.case_type = 'Key'
@@ -33,7 +29,7 @@ class Compromise(object):
         self.region = region
         self.case = case
         self.plugins = plugin.Core()
-        self.steps = steps_to_list(steps)
+        self.steps = ['disableaccess_key', 'revokests_key']
 
     def mitigate(self):
         """Any steps that run as part of key compromises."""
@@ -47,25 +43,22 @@ class Compromise(object):
             type_of_compromise='key_compromise'
         ).data()
 
-        client = connection.Connection(
-            type='client',
-            service='iam',
+        session = connection.Connection(
+            type='session',
             region=compromised_resource['region']
         ).connect()
 
-        logger.info(
-            "Proceeding with incident plan steps included are {steps}".format(steps=self.steps)
-        )
+        logger.info("Attempting key disable.")
 
         for action in self.steps:
-            logger.info("Executing step {step}.".format(step=action))
-
             step = self.plugins.source.load_plugin(action)
             step.Plugin(
-                client=client,
+                boto_session=session,
                 compromised_resource=compromised_resource,
                 dry_run=False
             )
+
+        logger.info("STS Tokens revoked issued prior to NOW.")
 
         logger.info("Disable complete.  Uploading results.")
 
