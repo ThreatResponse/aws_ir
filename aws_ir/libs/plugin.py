@@ -2,7 +2,6 @@ import aws_ir_plugins
 import os
 
 
-from functools import partial
 from pluginbase import PluginBase
 
 
@@ -10,7 +9,6 @@ class Core(object):
     """Enumerates core plugins that are part of the AWS_IR offering."""
     def __init__(self):
         self.here = os.path.abspath(os.path.dirname(__file__))
-        get_path = partial(os.path.join, self.here)
 
         self.plugin_base = PluginBase(
             package='aws_ir.plugins',
