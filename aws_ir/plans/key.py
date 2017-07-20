@@ -4,6 +4,8 @@ from aws_ir.libs import compromised
 from aws_ir.libs import connection
 from aws_ir.libs import plugin
 
+from aws_ir.plans import steps_to_list
+
 logger = logging.getLogger(__name__)
 
 
@@ -16,7 +18,8 @@ class Compromise(object):
         examiner_cidr_range='0.0.0.0/0',
         compromised_access_key_id=None,
         region='us-west-2',
-        case=None
+        case=None,
+        steps=None
     ):
 
         if compromised_access_key_id is None:
@@ -29,7 +32,7 @@ class Compromise(object):
         self.region = region
         self.case = case
         self.plugins = plugin.Core()
-        self.steps = ['disableaccess_key', 'revokests_key']
+        self.steps = steps_to_list(steps)
 
     def mitigate(self):
         """Any steps that run as part of key compromises."""
