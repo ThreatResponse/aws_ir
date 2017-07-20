@@ -95,7 +95,7 @@ class Compromise(object):
                 )
             elif 'get_memory' == action:
                 logger.info("attempting memory run")
-                self.do_mem(client, compromised_resource)
+                self.do_mem(session, compromised_resource)
 
     def do_mem(self, session, compromised_resource):
         if compromised_resource['platform'] == 'windows':
