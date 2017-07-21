@@ -23,7 +23,8 @@ class Case(object):
         case_number=None,
         examiner_cidr_range='0.0.0.0/0',
         case_bucket=None,
-        profile='default'
+        profile='default',
+        case_type=None
     ):
         self.profile = profile
 
@@ -88,7 +89,7 @@ class Case(object):
 
         self.inventory = self.aws_inventory.inventory
 
-    def __rename_log_file(self, case_number, resource_id, base_dir="/tmp"):
+    def _rename_log_file(self, case_number, resource_id, base_dir="/tmp"):
         """Move all log files to standard naming format"""
         try:
             os.rename(

@@ -193,9 +193,9 @@ class cli():
 
         aws_ir.wrap_log_file(case_obj.case_number)
         logger.info("Initialization successful proceeding to incident plan.")
-        case_obj.prep_aws_connections()
         if self.config.func == 'instance_compromise':
             if self.config.target:
+                case_obj.prep_aws_connections()
                 hc = host.Compromise(
                     user=self.config.user,
                     ssh_key_file=self.config.ssh_key,
@@ -234,10 +234,11 @@ class cli():
                             pass
         elif self.config.func == 'key_compromise':
             kc = key.Compromise(
-                self.config.examiner_cidr_range,
-                self.config.access_key_id,
-                case_obj,
-                self.config.plugins
+                examiner_cidr_range=self.config.examiner_cidr_range,
+                compromised_access_key_id=self.config.access_key_id,
+                region='us-west-2',
+                case=case_obj,
+                steps=self.config.plugins
             )
 
             try:

@@ -18,7 +18,7 @@ setup(name="aws_ir",
       scripts=['bin/aws_ir'],
       url='https://github.com/ThreatResponse/aws_ir',
 
-      download_url="https://github.com/ThreatResponse/aws_ir/archive/v0.2.2.tar.gz",
+      download_url="https://github.com/ThreatResponse/aws_ir/archive/v0.3.0.tar.gz",
 
       use_2to3=True,
       install_requires=['boto3>=1.3.0',
@@ -28,7 +28,7 @@ setup(name="aws_ir",
                         'structlog',
                         'pytz',
                         'jinja2',
-                        'margaritashotgun>=0.4.0'
+                        'margaritashotgun>=0.4.1'
                         ],
       tests_require=['pytest',
                      'pytest-cov',

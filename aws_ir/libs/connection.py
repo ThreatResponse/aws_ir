@@ -2,7 +2,7 @@ import boto3
 
 
 class Connection(object):
-    def __init__(self, type, service, region='us-west-2', profile='default'):
+    def __init__(self, type, service=None, region='us-west-2', profile='default'):
         self.region = region
         self.connection_type = type
         self.service = service

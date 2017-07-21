@@ -17,6 +17,6 @@ class CompromisedMetadata(object):
         metadata['case_number'] = self.case_number
         metadata['compromise_type'] = self.compromise_type
         metadata['public_ip_address'] = self.inventory.get('public_ip_address', None)
-        metadata['platform'] = self.inventory['platform']
+        metadata['platform'] = self.inventory.get('platform')
         metadata['examiner_cidr_range'] = self.examiner_cidr_range
         return metadata

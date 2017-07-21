@@ -49,7 +49,7 @@ class Compromise(object):
 
         session = connection.Connection(
             type='session',
-            region=compromised_resource['region']
+            region='us-west-2'
         ).connect()
 
         logger.info("Attempting key disable.")
