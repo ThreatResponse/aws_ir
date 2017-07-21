@@ -214,7 +214,7 @@ class TestCaseLib(object):
                 f.write('test jpg data')
                 f.close()
 
-            result = self.generic_case._rename_log_file(
+            self.generic_case._rename_log_file(
                 self.generic_case.case_number,
                 'i-12345678',
                 base_dir=self.log_base
