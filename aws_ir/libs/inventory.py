@@ -21,12 +21,12 @@ class Query(object):
 
         for reservation in reservations:
             for instance in reservation['Instances']:
-                instance_data = self.__extract_data_aws(instance, region)
+                instance_data = self._extract_data_aws(instance, region)
                 instance_data['region'] = region
                 inventory.append(instance_data)
         return inventory
 
-    def __extract_data_aws(self, instance, region):
+    def _extract_data_aws(self, instance, region):
         return dict(
             public_ip_address=instance.get('PublicIpAddress', None),
             private_ip_address=instance.get('PrivateIpAddress', None),
@@ -54,9 +54,9 @@ class Query(object):
 
 class InventoryType(object):
     def __init__(self):
-        self.type = self.__inventory_type()
+        self.type = self._inventory_type()
 
-    def __inventory_type(self):
+    def _inventory_type(self):
         return "aws"
 
 

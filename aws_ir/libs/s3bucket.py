@@ -12,15 +12,15 @@ class CaseBucket(object):
         self.bucket = self.find_or_create_by()
 
     def find_or_create_by(self):
-        bucket = self.__locate_bucket()
+        bucket = self._locate_bucket()
         if bucket is not None:
             return bucket
         else:
-            self.bucket_name = self.__generate_name()
-            bucket = self.__create_s3_bucket()
-            self.__set_acls(self.bucket_name)
-            self.__set_tags(self.bucket_name)
-            self.__set_versioning(self.bucket_name)
+            self.bucket_name = self._generate_name()
+            bucket = self._create_s3_bucket()
+            self._set_acls(self.bucket_name)
+            self._set_tags(self.bucket_name)
+            self._set_versioning(self.bucket_name)
             return bucket
         pass
 
@@ -34,11 +34,11 @@ class CaseBucket(object):
                 except Exception:
                     pass
 
-    def __generate_name(self):
+    def _generate_name(self):
         bucket_name = 'cloud-response-' + str(uuid.uuid4()).replace('-', '')
         return bucket_name
 
-    def __create_s3_bucket(self):
+    def _create_s3_bucket(self):
         # the if statement is to prevent
         # a fun little bug https://github.com/boto/boto3/issues/125
         if self.region == 'us-east-1':
@@ -54,10 +54,10 @@ class CaseBucket(object):
             )
         return bucket
 
-    def __set_acls(self, bucket_name):
+    def _set_acls(self, bucket_name):
         self.s3.BucketAcl(bucket_name).put(ACL='bucket-owner-full-control')
 
-    def __set_tags(self, bucket_name):
+    def _set_tags(self, bucket_name):
         self.client.put_bucket_tagging(
             Bucket=bucket_name,
             Tagging=dict(
@@ -70,7 +70,7 @@ class CaseBucket(object):
             )
         )
 
-    def __set_versioning(self, bucket_name):
+    def _set_versioning(self, bucket_name):
         self.client.put_bucket_versioning(
             Bucket=bucket_name,
             VersioningConfiguration=dict(
@@ -79,12 +79,12 @@ class CaseBucket(object):
             )
         )
 
-    def __locate_bucket(self):
+    def _locate_bucket(self):
         buckets = self.s3.buckets.all()
         for bucket in buckets:
             if bucket.name.startswith("cloud-response-"):
-                tags = self.__get_bucket_tags(bucket.name)
-                if self.__check_tags(tags):
+                tags = self._get_bucket_tags(bucket.name)
+                if self._check_tags(tags):
                     case_bucket = bucket
                     return case_bucket
                 else:
@@ -92,7 +92,7 @@ class CaseBucket(object):
             else:
                 pass
 
-    def __get_bucket_tags(self, bucket):
+    def _get_bucket_tags(self, bucket):
         try:
             s3 = self.client
             response = s3.get_bucket_tagging(
@@ -102,7 +102,7 @@ class CaseBucket(object):
             response = None
         return response
 
-    def __check_tags(self, tag_object):
+    def _check_tags(self, tag_object):
         if tag_object is None:
             return False
         elif tag_object.get('TagSet', None) is not None:

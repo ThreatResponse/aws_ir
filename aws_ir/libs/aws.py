@@ -1,10 +1,10 @@
 class AmazonWebServices(object):
     def __init__(self, client):
         self.client = client
-        self.regions = self.__get_regions()
-        self.availability_zones = self.__get_availability_zones()
+        self.regions = self._get_regions()
+        self.availability_zones = self._get_availability_zones()
 
-    def __get_regions(self):
+    def _get_regions(self):
         """Use the provided AWS Client to iterate over the regions and store them."""
 
         availRegions = []
@@ -13,7 +13,7 @@ class AmazonWebServices(object):
             availRegions.append(region['RegionName'])
         return availRegions
 
-    def __get_availability_zones(self):
+    def _get_availability_zones(self):
         """Use the provided AWS Client to iterate over the azs and store them"""
 
         availZones = []

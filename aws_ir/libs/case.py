@@ -44,12 +44,12 @@ class Case(object):
         if case_number:
             self.case_number = case_number
         else:
-            self.case_number = self.__generate_case_number()
+            self.case_number = self._generate_case_number()
 
         if case_bucket:
             self.case_bucket = case_bucket
         else:
-            self.case_bucket = self.__setup_bucket(region='us-west-2')
+            self.case_bucket = self._setup_bucket(region='us-west-2')
 
         self.examiner_cidr_range = examiner_cidr_range
 
@@ -108,8 +108,8 @@ class Case(object):
 
     def copy_logs_to_s3(self, base_dir="/tmp"):
         """Convinience function to put all case logs to s3 at the end"""
-        case_bucket = self.__get_case_bucket()
-        logs = self.__get_case_logs(base_dir=base_dir)
+        case_bucket = self._get_case_bucket()
+        logs = self._get_case_logs(base_dir=base_dir)
         for log in logs:
             case_bucket.upload_file(
                 "{base_dir}/{log}".format(
@@ -123,7 +123,7 @@ class Case(object):
         """Any final post mitigation steps universal to all plans. """
         try:
             aws_ir.wrap_log_file(self.case_number)
-            self.__rename_log_file(self.case_number, resource_id)
+            self._rename_log_file(self.case_number, resource_id)
             self.copy_logs_to_s3()
             processing_end_messaging = (
                 """Processing complete for {case_number}\n"""
@@ -144,7 +144,7 @@ class Case(object):
 
             sys.exit(1)
 
-    def __get_case_logs(self, base_dir="/tmp"):
+    def _get_case_logs(self, base_dir="/tmp"):
         """Enumerates all case logs based on case number from system /tmp"""
         files = []
         for file in os.listdir(base_dir):
@@ -152,7 +152,7 @@ class Case(object):
                 files.append(file)
         return files
 
-    def __setup_bucket(self, region):
+    def _setup_bucket(self, region):
         """Wrap s3 find or create in object"""
         client = connection.Connection(
             type='client',
@@ -168,10 +168,10 @@ class Case(object):
 
         return bucket_name
 
-    def __get_case_bucket(self):
+    def _get_case_bucket(self):
         return self.s3_resource.connect().Bucket(self.case_bucket)
 
-    def __generate_case_number(self):
+    def _generate_case_number(self):
         return datetime.utcnow().strftime(
             'cr-%y-%m%d%H-{0:04x}'
         ).format(
