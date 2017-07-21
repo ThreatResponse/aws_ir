@@ -5,14 +5,15 @@ Installation
 System Requirements
 *******************
 
-Currently only linux is a supported platform.  Python 3 compatability is maintained where possible but the tip of the master branch may only function in a Python 2 environment.
+ThreatResponse now requires python >= 3.4.  It may still work(ish) with Python 2.7 but is not recommended due
+to security problems with cryptography libraries in Python 2.7.
 
 While aws_ir is written purely in python, some of the libraries used require additional system packages.
 
 Fedora / RHEL Distributions
 ---------------------------
 
-* python-devel (Python 2.7+)
+* python-devel (Python 3.4+)
 * python-pip
 * libffi-devel
 * libssl-devel
@@ -20,7 +21,7 @@ Fedora / RHEL Distributions
 Debian Distributions
 --------------------
 
-* python-dev (Python 2.7+)
+* python-dev (Python 3.4+)
 * python-pip
 * libffi-dev
 * libssl-dev

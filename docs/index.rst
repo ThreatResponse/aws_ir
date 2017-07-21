@@ -10,7 +10,5 @@ Python installable command line utility for mitigation of host and key compromis
 
    quickstart
    installing
-   user_guide
    development
    about
-

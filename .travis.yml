@@ -2,6 +2,14 @@ language: python
 python:
   - "3.6"
 before_install:
+  - "mkdir -p /home/travis/.aws/"
+  - "echo [default] > /home/travis/.aws/credentials"
+  - "echo aws_access_key_id = sdfhdsfsadfdsfj >> /home/travis/.aws/credentials"
+  - "echo aws_secret_access_key = sdfhdsfsadfdsfj >> /home/travis/.aws/credentials"
+  - "echo [default] > /home/travis/.aws/config"
+  - "echo region = us-west-2 >> /home/travis/.aws/config"
+  - "echo output = json >> /home/travis/.aws/config"
+
   - "pip install flake8"
   - "flake8 aws_ir"
   - "flake8 tests"
@@ -10,3 +18,6 @@ install:
   - "pytest tests/"
   - "python setup.py build"
   - "python setup.py install"
+script:
+  - "pytest tests/"
+

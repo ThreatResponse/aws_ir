@@ -1,15 +1,14 @@
 __version__ = '0.2.2'
 
-import os
-import logging
-import time
 from datetime import datetime
+
+import logging
+import os
+import time
 
 
 def set_stream_logger(name="aws_ir", level=logging.INFO,
                       format_string=None):
-    """
-    """
 
     if format_string is None:
         format_string = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -26,12 +25,9 @@ def set_stream_logger(name="aws_ir", level=logging.INFO,
 
 def set_file_logger(case_number, name="aws_ir", level=logging.INFO,
                     base_dir="/tmp", desc="AWS_IR Action"):
-    """
-    """
-
     log_file = "{base_dir}/{case_number}-aws_ir.log".format(
-                   base_dir=base_dir, case_number=case_number
-               )
+        base_dir=base_dir, case_number=case_number
+    )
 
     logger = logging.getLogger(name)
     logger.setLevel(level)
@@ -44,12 +40,11 @@ def set_file_logger(case_number, name="aws_ir", level=logging.INFO,
     fileHandler.setFormatter(fileFormatter)
     logger.addHandler(fileHandler)
 
+
 def wrap_log_file(case_number, base_dir="/tmp"):
-    """
-    """
     log_file = "{base_dir}/{case_number}-aws_ir.log".format(
-                   base_dir=base_dir, case_number=case_number
-               )
+        base_dir=base_dir, case_number=case_number
+    )
     # if log_file exists and is not empty  append a closing "]" to the file
     if os.path.isfile(log_file) and (os.path.getsize(log_file) > 0):
         with open(log_file, 'a') as f:
@@ -63,6 +58,7 @@ def wrap_log_file(case_number, base_dir="/tmp"):
             f.flush()
             f.close()
 
+
 class TimesketchLogger(logging.getLoggerClass()):
 
     def __init__(self, *args, **kwargs):
@@ -71,6 +67,7 @@ class TimesketchLogger(logging.getLoggerClass()):
     def _log(self, level, msg, args, exc_info=None, extra=None):
         super(TimesketchLogger, self)._log(level, msg, args, exc_info=exc_info,
                                            extra=self.__get_times())
+
     def __get_times(self):
         tm = int(time.time())
         dt = datetime.utcfromtimestamp(tm).isoformat()
@@ -82,5 +79,7 @@ class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
+
 logging.setLoggerClass(TimesketchLogger)
+
 logging.getLogger('aws_ir').addHandler(NullHandler())
