@@ -10,3 +10,22 @@ All notable changes to this project will be documented in this file.
 
 - Rename `host-compromise` subcommand to `instance-compromise` [#25](https://github.com/ThreatResponse/aws_ir/issues/25).
 - Replace `timesketch_logger` class with python `logging` library [#28](https://github.com/ThreatResponse/aws_ir/issues/28)
+
+## [0.3.0] - 2017-07-20
+### Features Added
+
+* Plugin System for Community Plugins
+* Pep8 all code base
+* Parallel host acquisition
+* Support ip address or instance id for targeting
+* Separate plugin code to additional python module
+* Handle GPG key installation if not present
+* Support custom incident plans
+
+### Development Enhancements
+
+* Flake8 in CI Pipeline
+* Moto Mocking for Outside-In Test Coverage
+
+
+

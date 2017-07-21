@@ -61,12 +61,3 @@ class Compromise(object):
                 compromised_resource=compromised_resource,
                 dry_run=False
             )
-
-        logger.info("STS Tokens revoked issued prior to NOW.")
-
-        logger.info("Disable complete.  Uploading results.")
-
-        self.case.teardown(
-            region=self.region,
-            resource_id=self.compromised_access_key_id
-        )
