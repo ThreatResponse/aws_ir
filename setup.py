@@ -9,7 +9,7 @@ class install(_install):
 
 setup(name="aws_ir",
 
-      version="0.2.2",
+      version="0.3.0",
       author="Andrew Krug, Alex McCormack, Joel Ferrier",
       author_email="andrewkrug@gmail.com,developer@amccormack.net,joel@ferrier.io",
       packages=["aws_ir", "aws_ir/libs", "aws_ir/plans"],
@@ -28,7 +28,8 @@ setup(name="aws_ir",
                         'structlog',
                         'pytz',
                         'jinja2',
-                        'margaritashotgun>=0.4.1'
+                        'margaritashotgun>=0.4.1',
+                        'aws-ir-plugins>=0.0.2'
                         ],
       tests_require=['pytest',
                      'pytest-cov',

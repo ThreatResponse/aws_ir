@@ -11,6 +11,6 @@ logutils==0.3.3
 moto
 pytest-moto
 mock
-git+git://github.com/threatresponse/margaritashotgun.git
+margaritashotgun
 pluginbase
-git+git://github.com/threatresponse/aws_ir_plugins.git
+aws-ir-plugins
