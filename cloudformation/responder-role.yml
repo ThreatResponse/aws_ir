@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AWS_IR Incident Responder Role Set"
+Resources:
+  ResponderGroup:
+    Type: "AWS::IAM::Group"
+    Properties:
+      GroupName: "IncidentResponders"
+  CaseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+  ResponderPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      Description: "All Permissions aws_ir needs to interact with ec2 and IAM roles."
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Action:
+              - "s3:*"
+            Resource:
+              Fn::Join: ['', ['arn:aws:s3:::', {Ref: CaseBucket}, '/*' ]]
+          -
+            Effect: "Allow"
+            Action:
+              - "ec2:DescribeRegions"
+              - "ec2:DescribeAvailabilityZones"
+              - "ec2:DescribeInstances"
+              - "ec2:AttachVolume"
+              - "ec2:AuthorizeSecurityGroupEgress"
+              - "ec2:AuthorizeSecurityGroupIngress"
+              - "ec2:CopyImage"
+              - "ec2:CopySnapshot"
+              - "ec2:CreateFlowLogs"
+              - "ec2:CreateImage"
+              - "ec2:CreateKeyPair"
+              - "ec2:CreateNetworkAcl"
+              - "ec2:CreateNetworkAclEntry"
+              - "ec2:CreateSecurityGroup"
+              - "ec2:CreateSnapshot"
+              - "ec2:CreateSubnet"
+              - "ec2:CreateTags"
+              - "ec2:DetachNetworkInterface"
+              - "ec2:DetachVolume"
+              - "ec2:GetConsoleOutput"
+              - "ec2:GetConsoleScreenshot"
+              - "ec2:ImportImage"
+              - "ec2:ImportInstance"
+              - "ec2:ImportKeyPair"
+              - "ec2:ImportSnapshot"
+              - "ec2:ImportVolume"
+              - "ec2:ModifyInstanceAttribute"
+              - "ec2:ModifySnapshotAttribute"
+              - "ec2:ModifySubnetAttribute"
+              - "ec2:ModifyVolumeAttribute"
+              - "ec2:RebootInstances"
+              - "ec2:ReportInstanceStatus"
+              - "ec2:ResetSnapshotAttribute"
+              - "ec2:RestoreAddressToClassic"
+              - "ec2:RevokeSecurityGroupEgress"
+              - "ec2:RevokeSecurityGroupIngress"
+              - "ec2:StopInstances"
+              - "iam:AddRoleToInstanceProfile"
+              - "iam:AttachRolePolicy"
+              - "iam:AttachUserPolicy"
+              - "iam:DetachRolePolicy"
+              - "iam:DetachUserPolicy"
+              - "iam:CreatePolicy"
+              - "iam:GetAccessKeyLastUsed"
+              - "iam:PutRolePolicy"
+              - "iam:PutUserPolicy"
+              - "iam:UpdateAccessKey"
+              - "iam:UpdateUser"
+            Resource: "*"
+      ManagedPolicyName: "ResponderPermissions"
+  ResponderRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action:
+              - "sts:AssumeRole"
+            Condition:
+              StringEquals:
+                aws:PrincipalType: User
+              Bool:
+                aws:MultiFactorAuthPresent: 'true'
+      ManagedPolicyArns:
+        - !Ref 'ResponderPolicy'
+      RoleName: "ResponderRole"
+  ResponderCanAssumeRole:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      Description: Allow incident responders to assume role.
+      Path: /
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: Allow
+            Action: sts:AssumeRole
+            Resource:
+              - !GetAtt [ResponderRole, Arn]
+      Groups:
+        - "IncidentResponders"
+      ManagedPolicyName: "ResponderCanAssume"
+Outputs:
+  BucketName:
+    Value: !Ref 'CaseBucket'
+    Description: Case bucket to pass to aws_ir cli use this with the -b flag.
