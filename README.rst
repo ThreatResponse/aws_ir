@@ -11,7 +11,7 @@ Read the full documentation on `read the docs <https://aws_ir.readthedocs.io/en/
 Quickstart
 ----------
 
-For more information see the `user guide <https://aws_ir.readthedocs.io/en/latest/user_guide.html>`__.
+For more information see the `quickstart <https://aws_ir.readthedocs.io/en/latest/quickstart.html>`__.
 
 Installation
 ************
