@@ -28,6 +28,7 @@ setup(name="aws_ir",
                         'structlog',
                         'pytz',
                         'jinja2',
+                        'pluginbase',
                         'margaritashotgun>=0.4.1',
                         'aws-ir-plugins>=0.0.2'
                         ],
