@@ -209,6 +209,7 @@ class cli():
                 except KeyboardInterrupt:
                     pass
             if self.config.targets:
+                case_obj.prep_aws_connections()
                 logger.info(
                     'Alert : multi-host mode engaged targets in file will attempt processing.'
                 )
