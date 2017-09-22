@@ -26,6 +26,12 @@ Resources:
           -
             Effect: "Allow"
             Action:
+              - "cloudtrail:DescribeTrails"
+              - "cloudtrail:GetTrailStatus"
+              - "cloudtrail:ListTags"
+              - "cloudtrail:LookupEvents"
+              - "cloudtrail:StartLogging"
+              - "cloudtrail:UpdateTrail"
               - "ec2:DescribeRegions"
               - "ec2:DescribeAvailabilityZones"
               - "ec2:DescribeInstances"
