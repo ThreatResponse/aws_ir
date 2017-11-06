@@ -42,11 +42,12 @@ class Connection(object):
                     region_name=self.region,
                     profile_name=self.profile
                 )
+                logger.info(
+                    "Returning session for default profile."
+                )
             except Exception as e:
                 logger.info(
-                    "Could not derive default profile from config.  \
-                    Falling back to cred chain.\
-                    We are likely running on an instance.: {}".format(e)
+                    "We are likely running on AWS instance.: {}".format(e)
                 )
                 session = boto3.Session(
                     region_name=self.region
