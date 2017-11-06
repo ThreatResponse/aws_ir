@@ -9,7 +9,7 @@ class install(_install):
 
 setup(name="aws_ir",
 
-      version="0.3.0",
+      version="0.3.1",
       author="Andrew Krug, Alex McCormack, Joel Ferrier",
       author_email="andrewkrug@gmail.com,developer@amccormack.net,joel@ferrier.io",
       packages=["aws_ir", "aws_ir/libs", "aws_ir/plans"],
@@ -17,9 +17,7 @@ setup(name="aws_ir",
       description="AWS Incident Response ToolKit",
       scripts=['bin/aws_ir'],
       url='https://github.com/ThreatResponse/aws_ir',
-
       download_url="https://github.com/ThreatResponse/aws_ir/archive/v0.3.0.tar.gz",
-
       use_2to3=True,
       install_requires=['boto3>=1.3.0',
                         'progressbar_latest',
