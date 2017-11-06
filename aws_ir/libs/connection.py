@@ -1,4 +1,7 @@
 import boto3
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Connection(object):
@@ -12,7 +15,7 @@ class Connection(object):
         try:
             boto3.setup_default_session(profile_name=self.profile)
         except Exception as e:
-            raise(e)
+            logger.info("Problem setting default boto3 session: {}".format(e))
 
     def connect(self):
         if self.connection_type is None:
@@ -34,10 +37,20 @@ class Connection(object):
             self.resource = resource
             return self.resource
         elif self.connection_type == "session":
-            session = boto3.Session(
-                region_name=self.region,
-                profile_name=self.profile
-            )
+            try:
+                session = boto3.Session(
+                    region_name=self.region,
+                    profile_name=self.profile
+                )
+            except Exception as e:
+                logger.info(
+                    "Could not derive default profile from config.  \
+                    Falling back to cred chain.\
+                    We are likely running on an instance.: {}".format(e)
+                )
+                session = boto3.Session(
+                    region_name=self.region
+                )
             return session
         else:
             raise AttributeError(
