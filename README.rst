@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/ThreatResponse/aws_ir.svg?branch=master)](https://travis-ci.org/ThreatResponse/aws_ir)
+.. image:: https://travis-ci.org/ThreatResponse/aws_ir.svg?branch=master
+    :target: https://travis-ci.org/ThreatResponse/aws_ir
 
 AWS IR
 ======
