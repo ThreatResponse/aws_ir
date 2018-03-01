@@ -16,8 +16,8 @@ before_install:
 install:
   - "pip install -r requirements.txt"
   - "pytest tests/"
-  - "python setup.py build"
-  - "python setup.py install"
+  - "python -W ignore::UserWarning:distutils.dist setup.py build"
+  - "python -W ignore::UserWarning:distutils.dist setup.py install"
 script:
   - "pytest tests/"
 
