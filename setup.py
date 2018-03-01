@@ -1,6 +1,13 @@
+import re
 from distutils.command.build import build
 from setuptools import setup
 from setuptools.command.install import install as _install
+
+VERSION = re.search(
+    r"^__version__ = ['\"]([^'\"]*)['\"]",
+    open('aws_ir/_version.py', 'r').read(),
+    re.MULTILINE
+).group(1)
 
 class install(_install):
     def run(self):
@@ -9,8 +16,8 @@ class install(_install):
 
 setup(name="aws_ir",
 
-      version="0.3.1",
-      author="Andrew Krug, Alex McCormack, Joel Ferrier",
+      version=VERSION,
+      author="Andrew Krug, Alex McCormack, Joel Ferrier, Jeff Parr",
       author_email="andrewkrug@gmail.com,developer@amccormack.net,joel@ferrier.io",
       packages=["aws_ir", "aws_ir/libs", "aws_ir/plans"],
       license="MIT",

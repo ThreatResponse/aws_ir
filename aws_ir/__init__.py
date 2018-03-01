@@ -1,9 +1,11 @@
-__version__ = '0.3.1'
-
 from datetime import datetime
 import logging
 import os
 import time
+
+from aws_ir import _version
+
+__version__ = _version.__version__
 
 
 def set_stream_logger(name="aws_ir", level=logging.INFO,
