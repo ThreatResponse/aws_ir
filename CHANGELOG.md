@@ -27,5 +27,12 @@ All notable changes to this project will be documented in this file.
 * Flake8 in CI Pipeline
 * Moto Mocking for Outside-In Test Coverage
 
+## [0.3.1] - 2018-03-10
+### CI/CD
+
+* Consolidate Versioning
+* Deploy to PyPI from CI for all tagged releases
+* Deploy to PyPI test from all untagged releases (adds build # to version)
+
 
 
