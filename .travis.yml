@@ -1,6 +1,7 @@
 language: python
 python:
   - "3.6"
+cache: pip
 before_install:
   - "mkdir -p /home/travis/.aws/"
   - "echo [default] > /home/travis/.aws/credentials"
@@ -9,15 +10,33 @@ before_install:
   - "echo [default] > /home/travis/.aws/config"
   - "echo region = us-west-2 >> /home/travis/.aws/config"
   - "echo output = json >> /home/travis/.aws/config"
+  - if [[ -z $TRAVIS_TAG ]]; then sed -i "s/['\"]\([^\"]*\)['\"]/\"\1b$TRAVIS_BUILD_NUMBER\"/g" aws_ir/_version.py; fi
 
-  - "pip install flake8"
-  - "flake8 aws_ir"
-  - "flake8 tests"
 install:
-  - "pip install -r requirements.txt"
-  - "pytest tests/"
-  - "python -W ignore::UserWarning:distutils.dist setup.py build"
-  - "python -W ignore::UserWarning:distutils.dist setup.py install"
+  - pip install -r requirements.txt
+  - pip install flake8
+  - python -W ignore::UserWarning:distutils.dist setup.py build
 script:
-  - "pytest tests/"
+  - cat aws_ir/_version.py
+  - flake8 aws_ir
+  - flake8 tests
+  - pytest tests/
 
+deploy:
+  - provider: pypi
+    distributions: sdist bdist_wheel
+    user: threatresponse
+    password:
+      secure: 0j3uJew5G/+06gQnKRYDdWfwKYfWuXBFSQXob1T6Q8aFsY7Ats+4HjQE1gC1igU/6XwPCBPUBHVuVC1YCfXQFLbqTAJng8F28Z+ULZLkO78+0qTUbqWXqclKT7ES2VaMRhAyNuxPg76WJ0W5cDq+q9nJ05jJjxdfmPhlEgJNHKpc0W1l5RtXKwTyHawAdxZxhBcuNtopMBuSgB7EN/jy4S5xyKAdNNITLUoVD9HwS9pMWIv5t2crvFZXxyoIDR4ga4bCGCAz1NSdFsSguTQb/EeClItw/BEUuFyv6KkMbkfiCcLJZBdEXEUyshrMIo2smenblK4iYFNS7c25BqMuXsdxe39fgkRFkC41W/JB2WtBvMpMESi7+b18KKR9Y+8Hh+3i+BjiNl2RN8Um8vMaRh6B9jt8+dI7zc6QIohviPeDLif1L7jkU8NpCIGgYDWOy2rGfeWnOz07scoObiZbozlbZw15nWIAIzo4pELt5Ga0voBQ179KJdH88dso25mF9cAKhRezqTzJY1YS7GUKavdugfnL5Cpthyal4ajVrVw5J66cJZmyT2Qmj/uzfTrXxXfFfDALQOiFWea3EbV8qSnf0MkVV4pEixdlnD1jobFZNZLFg1VCNJionSbqZbUccSCLjjKkv05XTjUktJV37V5m41xBm7mRH9PvPgGHCOo=
+    on:
+      tags: true
+
+  - provider: pypi
+    server: https://test.pypi.org/legacy/
+    distributions: sdist bdist_wheel
+    user: threatresponse
+    password:
+      secure: 3WT5LhsCxkkJReN2Tg2wHwlzFIQ9cVQagIxekf7b/iPDy2M+CGhGC94sct5Rx5J6JSy2yiQfMRAjdvFQMFewM52s1H9iojsOx5uHxAzulEMdMkI7FehKD49d9k0wnBkkIu9cS9/0nvaFCQIiaV/J/5F7U7WXqC0JgZOoJCAIBWrUSjwnbeMlyRsJwfy4jQQY8AqzqewJFlcpfzW0tJKyNMsgRyi+pxT60ihuNrT3oCwzjV/g7CajmD1fq41FwRgSzmFzF3qyCSxEhQ0KOYtUNZ8FzkpxoN8s8CKOBT20B2tUJhMp2wv5f16r4zsFPemA7mpPuZMWlCghJId8ad61reWPs7sxjGgxHXOm0hvBGGrM17vOAM176pahjLlTSN9Bl0A2QyL7fKmQhxnBWT6ZnbVo3jW9cEx2qee1dyR/ybPbMZTatrx9eb9Jdl381/10YMeqkfCm0rrEfLluVVI3Oq0yGvzIRCOgCskzIKwj2bDbor5H2Tu45ht5OUB5inQpFQapRkZ3pc6W4o9c7ONcrhoQVoazEWUAm8hNn7oaR9rd+yY7F0+ojjLZxnOaIYsk11eSeTnVyIesexmHdL0iltuteWZ3wxEIsB8Revx3KxlhudwCvINlD8Jj8L1WdiyIPcEa4QeQF/bNTht6SWFPGC/EbM+jaOAGaagVkdBGQwk=
+    skip_cleanup: true
+    on:
+      all_branches: true
