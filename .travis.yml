@@ -15,8 +15,7 @@ before_install:
 install:
   - pip install -r requirements.txt
   - pip install flake8
-  - python setup.py install
-
+  - python -W ignore::UserWarning:distutils.dist setup.py build
 script:
   - cat aws_ir/_version.py
   - flake8 aws_ir
