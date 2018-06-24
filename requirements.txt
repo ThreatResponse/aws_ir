@@ -1,6 +1,4 @@
 jinja2
-pytest
-pytest-cov
 boto3>=1.3.0
 progressbar-latest
 gnupg
@@ -8,10 +6,23 @@ requests
 structlog
 pytz
 logutils==0.3.3
-moto
-pytest-moto
-mock
-margaritashotgun
+margaritashotgun>=0.4.1
 pluginbase
-aws-ir-plugins
+
+mock
+moto
+pytest
+pytest-cov
+pytest-moto
+pytest-watch
+
+### Latest Stable
+aws_ir_plugins==0.0.3
+
+### Test build
+# --extra-index-url https://test.pypi.org/simple
+# aws-ir-plugins==0.0.3b52
+
+### Local
+# -e ../aws_ir_plugins
 

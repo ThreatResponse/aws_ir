@@ -1,6 +1,4 @@
 import os
-import sys
-sys.path.append(os.getcwd())
 import aws_ir
 from aws_ir import TimesketchLogger
 import logging

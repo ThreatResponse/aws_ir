@@ -2,12 +2,10 @@ import boto3
 import os
 import random
 import string
-import sys
 
 from moto import mock_ec2
 from moto import mock_s3
 
-sys.path.append(os.getcwd())
 from aws_ir.libs import case
 
 

@@ -300,28 +300,58 @@ Step 1. Fork us on Github.
   # 1. git clone
   git@github.com:<your github here>/aws_ir.git
 
+Step 2. Setup
+
   # 2. setup a virtualenv (must be python3)
   cd aws_ir
-  virtualenv env -p python3
+  python3 -m virtualenv env
 
   # 3. activate the virtualenv
   source env/bin/activate
 
-  # 4. install the requirements
-  pip3 install -r requirements.txt
 
-  # 5. run the test suite (currently pyTest soon to be pyUnit)
-  pytest tests/
+  # 4a. with setuptools
+  pip install -e .
+  python setup.py test
+  python setup.py pytest --addopts='tests/test_cli.py'
 
-  # 6. If all is well you can start developing code!
+  -- or --
 
-Step 2. Develop!
+  # 4b. with local plugins and pytest-watch
+  point requirements.txt to the local version of aws_ir_plugins `-e ../aws_ir_plugins`
+  .. code-block:: bash
+    pip3 install -r requirements.txt
+    ./bin/aws_ir -h
+    ptw --runner "python setup.py test"
 
-*Note:* aws_ir does not require an install to run out of a virtualenv.  There
-is a helper script in `bin/aws_ir` that can be called to execute your development
-version of aws_ir.
+  -- or --
+
+  #4c. Use the docker container
+  .. code-block:: bash
+    docker-compose build aws_ir
+    docker-compose run aws_ir bash
+    pip install -e .
+
+
+Step 3. Develop!
+
+
+*Note:* There is a helper script in `bin/aws_ir` that can be called to execute aws_ir.
 
 When your feature is finished simply open a PR back to us.
 
-Happy developing!  If you have any questions please do file a github issue
+If you have any questions please do file a github issue
 or e-mail info@threatresponse.cloud .
+
+Using testpypi
+*******************************************
+
+.. code-block:: bash
+  pip install --extra-index-url https://test.pypi.org/simple/ aws_ir==0.3.2b165
+
+To use a test build of aws_ir_plugins:
+  in setup.py:
+  - point the required version at aws_ir_plugins==0.0.3b123 (substitute the build you want)
+  - add: dependency_links=['https://test.pypi.org/simple/aws-ir-plugins/']
+
+

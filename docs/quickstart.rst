@@ -7,15 +7,13 @@ First, :doc:`Install aws_ir <installing>`.
 Installation
 ************
 
-Using a python3 virtualenv is highly recommended.
-
 .. code-block:: bash
 
-    $ virtualenv aws_ir_env -p python3
-    $ source/aws_ir_env/bin/activate
-    $ pip3 install aws_ir
+    $ virtualenv env -p python3
+    $ source/env/bin/activate
+    $ pip install aws_ir
 
-Or see `installing <https://aws_ir.readthedocs.io/en/latest/installing.html>`__.
+For other installation options see: `installing <https://aws_ir.readthedocs.io/en/latest/installing.html>`__.
 
 AWS Credentials
 ***************
@@ -26,8 +24,7 @@ Ensure aws credentials are configured under the user running aws_ir as documente
 Setup Roles with Cloudformation
 *************************************
 
-A cloudformation stack has been provided to setup a group and a responder role.  *Note that this roles has a constraint
-that all your responders use MFA.*
+A cloudformation stack has been provided to setup a group and a responder role.
 
 Simply create the stack available at:
 
@@ -35,28 +32,10 @@ Simply create the stack available at:
 
 Then add all your users to the IncidentResponders group.  After that you're good to go!
 
-AWS Credentials Using MFA and AssumeRole
-*****************************************
-
-Many users of aws_ir have requested the ability to use the tooling with mfa and
-assumeRole functionality.  While we don't natively support this yet v0.3.0 sets
-the stage to do this natively by switching to boto-session instead of thick clients.
-
-For now if you need to use the tool with MFA we recommend:
-
-`https://pypi.python.org/pypi/awsmfa/0.2.4 <https://pypi.python.org/pypi/awsmfa/0.2.4>`_.
-
+*Note that this roles has a constraint that all your responders use MFA.*
 .. code-block:: bash
+  aws:MultiFactorAuthPresent: 'true'
 
-    aws-mfa \
-    --device arn:aws:iam::12345678:mfa/bobert \
-    -assume-role arn:aws:iam::12345678:role/ResponderRole \
-    --role-session-name \"bobert-ir-session\"
-
-awsmfa takes a set of long lived access keys from a boto profile called [default-long-lived]
-and uses those to generate temporary session tokens that are automatically put into
-the default boto profile.  This ensures that any native tooling that doesn't support
-MFA + AssumeRole can still leverage MFA and short lived credentials for access.
 
 Key Compromise
 **************
