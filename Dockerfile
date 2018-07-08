@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.4
 
 RUN mkdir /aws_ir
 ADD . /aws_ir/
