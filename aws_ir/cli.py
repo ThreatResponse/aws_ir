@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import argparse
 import logging
 import os
 import sys
-
 
 import aws_ir
 from aws_ir import __version__

@@ -1,7 +1,6 @@
 import re
 from distutils.command.build import build
 from setuptools import setup
-from setuptools.command.install import install as _install
 
 VERSION = re.search(
     r"^__version__ = ['\"]([^'\"]*)['\"]",
@@ -9,13 +8,7 @@ VERSION = re.search(
     re.MULTILINE
 ).group(1)
 
-class install(_install):
-    def run(self):
-        self.run_command('build')
-        _install.run(self)
-
 setup(name="aws_ir",
-
       version=VERSION,
       author="Andrew Krug, Alex McCormack, Joel Ferrier, Jeff Parr",
       author_email="andrewkrug@gmail.com,developer@amccormack.net,joel@ferrier.io",
@@ -26,6 +19,7 @@ setup(name="aws_ir",
       url='https://github.com/ThreatResponse/aws_ir',
       download_url="https://github.com/ThreatResponse/aws_ir/archive/v0.3.0.tar.gz",
       use_2to3=True,
+      zip_safe=True,
       install_requires=['boto3>=1.3.0',
                         'progressbar_latest',
                         'logutils==0.3.3',
@@ -35,11 +29,12 @@ setup(name="aws_ir",
                         'jinja2',
                         'pluginbase',
                         'margaritashotgun>=0.4.1',
-                        'aws-ir-plugins>=0.0.2'
+                        'aws-ir-plugins>=0.0.3'
                         ],
+      setup_requires=['pytest-runner'],
       tests_require=['pytest',
                      'pytest-cov',
+                     'pytest-watch',
                      'moto',
-                     'mock',
-                     'magicmock'],
+                     'mock'],
       )
