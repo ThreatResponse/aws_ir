@@ -9,7 +9,7 @@ Installation
 
 .. code-block:: bash
 
-    $ virtualenv env -p python3
+    $ python3 -m virtualenv env
     $ source/env/bin/activate
     $ pip install aws_ir
 

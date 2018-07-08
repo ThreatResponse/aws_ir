@@ -124,8 +124,6 @@ def test_rename_log_file():
         base_dir=log_base
     )
 
-    print(result)
-
     assert result is True
 
 

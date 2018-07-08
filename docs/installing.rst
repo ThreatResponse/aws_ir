@@ -12,7 +12,7 @@ Installing from PyPi
 ********************
 
 .. code-block:: bash
-   $ virtualenv env -p python3
+   $ python3 -m virtualenv env
    $ source/env/bin/activate
    $ pip install aws_ir
    $ aws_ir -h
@@ -23,7 +23,7 @@ Installing From Github
 
 .. code-block:: bash
 
-   $ virtualenv env -p python3
+   $ python3 -m virtualenv env
    $ source/env/bin/activate
    $ pip install git+ssh://git@github.com/ThreatResponse/aws_ir.git@master
    $ aws_ir -h
@@ -35,7 +35,7 @@ Local Build and Install
 
    $ git clone https://github.com/ThreatResponse/aws_ir.git
    $ cd aws_ir
-   $ virtualenv env -p python3
+   $ python3 -m virtualenv env
    $ source/env/bin/activate
    $ pip install .
    $ aws_ir -h
@@ -49,7 +49,7 @@ In the previous two example dependencies are automatically resolved, if you simp
 
    $ git clone https://github.com/ThreatResponse/aws_ir.git
    $ cd aws_ir
-   $ virtualenv env -p python3
+   $ python3 -m virtualenv env
    $ source/env/bin/activate
    $ pip install -r requirements.txt
    $ ./bin/aws_ir -h
