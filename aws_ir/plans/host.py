@@ -77,7 +77,8 @@ class Compromise(object):
 
         session = connection.Connection(
             type='session',
-            region=compromised_resource['region']
+            region=compromised_resource['region'],
+            profile=self.case.profile
         ).connect()
 
         logger.info(
