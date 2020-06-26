@@ -47,7 +47,7 @@ class Compromise(object):
 
     def _target_type(self):
         """Returns the target type based on regex."""
-        if len(self.target.split('.')) is 4:
+        if len(self.target.split('.')) == 4:
             return 'ip-address'
         else:
             return 'instance-id'
