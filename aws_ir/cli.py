@@ -218,7 +218,7 @@ class cli():
                     targets = f.read().split('\n')
 
                 for target in targets:
-                    if target is not '':
+                    if target != '':
                         hc = host.Compromise(
                             user=self.config.user,
                             ssh_key_file=self.config.ssh_key,
