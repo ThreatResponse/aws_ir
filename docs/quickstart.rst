@@ -33,6 +33,7 @@ Simply create the stack available at:
 Then add all your users to the IncidentResponders group.  After that you're good to go!
 
 *Note that this roles has a constraint that all your responders use MFA.*
+
 .. code-block:: bash
   aws:MultiFactorAuthPresent: 'true'
 
